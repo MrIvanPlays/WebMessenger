@@ -101,7 +101,7 @@ public class RequestResponseContextImpl implements RequestResponseContext {
     if (val == null) {
       return Optional.empty();
     }
-    return Optional.of(new HttpExchangeCustomHeader(key, val));
+    return Optional.of(CustomHeader.of(key, val));
   }
 
   @Override
