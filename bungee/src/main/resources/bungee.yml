@@ -1,0 +1,4 @@
+name: WebMessenger
+version: '${version}'
+main: com.mrivanplays.webmessenger.bungee.WebMessengerBungee
+author: Ivan Pekov

@@ -1,0 +1,6 @@
+port: 8082
+secret: "test"
+enable-rate-limit: true
+rate-limit: 2
+rate-limit-time: 5
+enable-debug: true

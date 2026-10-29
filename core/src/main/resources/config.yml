@@ -1,0 +1,22 @@
+# Configuration file of WebMessenger
+
+# Port to listen to for requests
+port: 8082
+
+# A secret key which all requests should contain
+# in the request header. If a request does not
+# contain the secret key, the web server will
+# respond with 403 (or 'forbidden')
+secret: "43ab005peek2ehrje"
+
+# Shall a rate limiter be used, how many requests
+# need to pass in the given time before a rate limit occurs
+# Default settings are 3 requests in 5 seconds, more will result
+# in a rate limit
+enable-rate-limit: false
+rate-limit: 3
+# Minimum value of 1 second
+rate-limit-time: 5
+
+# Enable debug logging messages
+enable-debug: false

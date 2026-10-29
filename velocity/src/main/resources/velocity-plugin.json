@@ -1,0 +1,9 @@
+{
+  "id": "webmessenger-velocity",
+  "name": "WebMessenger",
+  "version": "${version}",
+  "main": "com.mrivanplays.webmessenger.velocity.WebMessengerVelocity",
+  "authors": [
+    "Ivan Pekov"
+  ]
+}
