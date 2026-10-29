@@ -7,6 +7,7 @@ import java.util.Deque;
 import java.util.HashMap;
 import java.util.Map;
 
+// todo: javadoc
 public final class SimpleRateLimiter implements RateLimiter {
 
   public static SimpleRateLimiter of(Settings settings) {

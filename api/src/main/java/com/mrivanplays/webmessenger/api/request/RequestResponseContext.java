@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.util.Optional;
 
+// todo: requires a bunch of documentation in order to guarantee proper API use
 public interface RequestResponseContext {
 
   void writeResponse(JsonElement response) throws IOException;

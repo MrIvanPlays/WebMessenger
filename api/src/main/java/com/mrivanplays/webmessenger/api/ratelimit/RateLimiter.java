@@ -3,6 +3,7 @@ package com.mrivanplays.webmessenger.api.ratelimit;
 import java.net.InetSocketAddress;
 import java.time.Duration;
 
+// todo: javadoc
 public interface RateLimiter {
 
   Settings settings();

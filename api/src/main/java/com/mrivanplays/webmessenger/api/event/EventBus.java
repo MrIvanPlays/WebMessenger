@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
+// todo: javadoc
 public enum EventBus {
   INSTANCE;
 
