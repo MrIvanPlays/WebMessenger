@@ -62,11 +62,6 @@ public class BungeeDataProvider implements ServerDataProvider {
   }
 
   @Override
-  public boolean isProxy() {
-    return true;
-  }
-
-  @Override
   public Platform type() {
     return Platform.BUNGEECORD;
   }

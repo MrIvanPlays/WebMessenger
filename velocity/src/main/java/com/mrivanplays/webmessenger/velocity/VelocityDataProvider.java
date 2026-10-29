@@ -56,11 +56,6 @@ public class VelocityDataProvider implements ServerDataProvider {
   }
 
   @Override
-  public boolean isProxy() {
-    return true;
-  }
-
-  @Override
   public Platform type() {
     return Platform.VELOCITY;
   }

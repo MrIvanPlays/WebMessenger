@@ -14,7 +14,5 @@ public interface ServerDataProvider extends ServerInfo {
 
   ServerInfo serverInfo(String serverName);
 
-  boolean isProxy();
-
   Platform type();
 }

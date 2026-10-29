@@ -46,7 +46,7 @@ public class ServerInfoRequest extends MessengerHttpHandler {
                   }),
           200);
     } else {
-      if (!getPlugin().getDataProvider().isProxy()) {
+      if (!getPlugin().getDataProvider().type().isProxy()) {
         this.handleGenericErrorResponse(
             exchange,
             "Server is not a proxy and cannot provide information for server :" + serverNameAttr,

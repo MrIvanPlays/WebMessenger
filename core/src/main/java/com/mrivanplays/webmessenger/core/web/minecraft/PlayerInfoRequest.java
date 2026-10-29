@@ -46,7 +46,8 @@ public class PlayerInfoRequest extends MessengerHttpHandler {
       return;
     }
     String server = "server_no_proxy";
-    if (getPlugin().getDataProvider().isProxy() && playerInfo.connectedServerInfo() != null) {
+    if (getPlugin().getDataProvider().type().isProxy()
+        && playerInfo.connectedServerInfo() != null) {
       server = playerInfo.connectedServerInfo().name();
     }
 

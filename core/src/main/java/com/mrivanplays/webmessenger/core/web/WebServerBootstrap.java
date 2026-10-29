@@ -103,6 +103,12 @@ public class WebServerBootstrap extends WebMessengerServer {
       server.setExecutor(plugin.getAsyncExecutor());
       server.start();
       plugin.getLogger().info("HTTP server running at port: " + plugin.getConfig().getPort());
+      plugin
+          .getLogger()
+          .info(
+              "Running on "
+                  + plugin.getDataProvider().type().prettyName()
+                  + " minecraft server software");
       EventBus.INSTANCE.fire(new WebServerPostStartupEvent());
     } catch (IOException e) {
       plugin.getLogger().error("Couldn't start server", e);
