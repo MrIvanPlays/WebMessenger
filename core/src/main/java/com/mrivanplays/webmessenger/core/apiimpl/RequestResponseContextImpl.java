@@ -7,7 +7,6 @@ import com.mrivanplays.webmessenger.api.request.RequestResponseContext;
 import com.mrivanplays.webmessenger.api.request.header.CustomHeader;
 import com.mrivanplays.webmessenger.core.util.Utils;
 import com.sun.net.httpserver.HttpExchange;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
@@ -61,9 +60,7 @@ public class RequestResponseContextImpl implements RequestResponseContext {
         if (values.size() == 1) {
           exchange.getResponseHeaders().add(header.key(), values.getFirst());
         } else {
-          for (String val : values) {
-            exchange.getResponseHeaders().add(header.key(), val);
-          }
+          exchange.getResponseHeaders().add(header.key(), String.join("; ", values));
         }
       }
     }
