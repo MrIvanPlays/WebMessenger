@@ -1,4 +1,4 @@
-package com.mrivanplays.webmessenger.core.web.requests;
+package com.mrivanplays.webmessenger.core.web.generic;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;

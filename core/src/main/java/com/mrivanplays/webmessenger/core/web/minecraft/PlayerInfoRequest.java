@@ -1,4 +1,4 @@
-package com.mrivanplays.webmessenger.core.web.requests;
+package com.mrivanplays.webmessenger.core.web.minecraft;
 
 import com.google.gson.JsonObject;
 import com.mrivanplays.webmessenger.api.request.RequestMetadata;

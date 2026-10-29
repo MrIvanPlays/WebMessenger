@@ -1,7 +1,8 @@
-package com.mrivanplays.webmessenger.core.web;
+package com.mrivanplays.webmessenger.core.web.generic;
 
 import com.mrivanplays.webmessenger.api.request.RequestMetadata;
 import com.mrivanplays.webmessenger.core.WebMessengerPlugin;
+import com.mrivanplays.webmessenger.core.web.MessengerHttpHandler;
 import com.sun.net.httpserver.HttpExchange;
 import java.io.IOException;
 

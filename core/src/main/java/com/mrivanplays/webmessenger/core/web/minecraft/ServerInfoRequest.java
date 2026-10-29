@@ -1,7 +1,6 @@
-package com.mrivanplays.webmessenger.core.web.requests;
+package com.mrivanplays.webmessenger.core.web.minecraft;
 
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mrivanplays.webmessenger.api.request.RequestMetadata;
 import com.mrivanplays.webmessenger.core.PlayerInfo;
@@ -15,7 +14,6 @@ import java.io.IOException;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import javax.management.RuntimeErrorException;
 
 public class ServerInfoRequest extends MessengerHttpHandler {
 
