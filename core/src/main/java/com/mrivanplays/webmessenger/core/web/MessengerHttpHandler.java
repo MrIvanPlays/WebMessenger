@@ -92,6 +92,7 @@ public abstract class MessengerHttpHandler implements HttpHandler {
         handleGenericErrorResponse(exchange, "Internal server error", 500);
       } catch (IOException io) {
         plugin.getLogger().error("IO whilst trying to HTTP respond 500", io);
+        exchange.close(); // assume exchange is not closed and close it.
       }
     }
   }
