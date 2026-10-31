@@ -12,7 +12,7 @@ public class RobotsTxtEndpoint extends MessengerHttpHandler {
   private byte[] cachedBytes;
 
   public RobotsTxtEndpoint(WebMessengerPlugin plugin) {
-    super(plugin);
+    super(plugin, false);
     this.metadata = RequestMetadata.simpleGet(WebMessengerPlugin.API_IDENTIFIER, "/robots.txt");
   }
 
@@ -29,11 +29,6 @@ public class RobotsTxtEndpoint extends MessengerHttpHandler {
     exchange.sendResponseHeaders(200, cachedBytes.length);
     exchange.getResponseBody().write(cachedBytes);
     exchange.close();
-  }
-
-  @Override
-  protected boolean shouldAuthenticate() {
-    return false;
   }
 
   @Override

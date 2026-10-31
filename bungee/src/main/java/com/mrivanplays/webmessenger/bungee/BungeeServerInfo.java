@@ -38,22 +38,21 @@ public class BungeeServerInfo implements ServerInfo {
   @Override
   public CompletableFuture<ServerPing> ping() {
     CompletableFuture<ServerPing> future = new CompletableFuture<>();
-    parent.ping(
-        (bPing, ex) -> {
-          if (ex != null) {
-            future.completeExceptionally(ex);
-            return;
-          }
-          if (bPing == null) {
-            future.complete(null);
-            return;
-          }
-          future.complete(
-              new ServerPing(
-                  bPing.getVersion().getName(),
-                  true,
-                  BaseComponent.toPlainText(bPing.getDescriptionComponent())));
-        });
+    parent.ping((bPing, ex) -> {
+      if (ex != null) {
+        future.completeExceptionally(ex);
+        return;
+      }
+      if (bPing == null) {
+        future.complete(null);
+        return;
+      }
+      future.complete(
+          new ServerPing(
+              bPing.getVersion().getName(),
+              true,
+              BaseComponent.toPlainText(bPing.getDescriptionComponent())));
+    });
     return future;
   }
 }

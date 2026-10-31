@@ -5,4 +5,4 @@ main: com.mrivanplays.webmessenger.bukkit.WebMessengerBukkit
 api-version: '26.3'
 load: POSTWORLD
 
-authors: [Ivan Pekov]
+authors: [ Ivan Pekov ]

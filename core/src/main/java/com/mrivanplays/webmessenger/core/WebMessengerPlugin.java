@@ -4,12 +4,10 @@ import com.mrivanplays.webmessenger.api.Identifier;
 import com.mrivanplays.webmessenger.api.WebMessengerServer;
 import com.mrivanplays.webmessenger.core.config.Config;
 import com.mrivanplays.webmessenger.core.log.PluginLogger;
-
 import com.mrivanplays.webmessenger.core.web.WebServerBootstrap;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.concurrent.Executor;
-import java.util.concurrent.ScheduledExecutorService;
 
 public final class WebMessengerPlugin {
 

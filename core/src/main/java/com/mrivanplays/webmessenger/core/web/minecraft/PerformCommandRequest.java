@@ -47,26 +47,25 @@ public class PerformCommandRequest extends MessengerHttpHandler {
     getPlugin()
         .getDataProvider()
         .performCommand(command)
-        .whenComplete(
-            (resp, e) -> {
-              if (e != null) {
-                getPlugin()
-                    .getLogger()
-                    .error("Exception when performing command", new RuntimeException(e));
-                return;
-              }
-              JsonObject response = new JsonObject();
-              try {
-                if (resp) {
-                  response.addProperty("message", "Success");
-                  this.respond(exchange, response, 200);
-                } else {
-                  response.addProperty("message", "Command execution failed");
-                  this.respond(exchange, response, 502);
-                }
-              } catch (IOException ex) {
-                getPlugin().getLogger().error("Exception when responding", ex);
-              }
-            });
+        .whenComplete((resp, e) -> {
+          if (e != null) {
+            getPlugin()
+                .getLogger()
+                .error("Exception when performing command", new RuntimeException(e));
+            return;
+          }
+          JsonObject response = new JsonObject();
+          try {
+            if (resp) {
+              response.addProperty("message", "Success");
+              this.respond(exchange, response, 200);
+            } else {
+              response.addProperty("message", "Command execution failed");
+              this.respond(exchange, response, 502);
+            }
+          } catch (IOException ex) {
+            getPlugin().getLogger().error("Exception when responding", ex);
+          }
+        });
   }
 }

@@ -12,7 +12,7 @@ public class NotFoundRequest extends MessengerHttpHandler {
   private final RequestMetadata metadata;
 
   public NotFoundRequest(WebMessengerPlugin plugin) {
-    super(plugin);
+    super(plugin, false);
     this.metadata = RequestMetadata.of(WebMessengerPlugin.API_IDENTIFIER, "/", RequestType.ALL);
   }
 
@@ -24,10 +24,5 @@ public class NotFoundRequest extends MessengerHttpHandler {
   @Override
   protected void handle0(HttpExchange exchange) throws IOException {
     this.handleGenericErrorResponse(exchange, "Not Found", 404);
-  }
-
-  @Override
-  protected boolean shouldAuthenticate() {
-    return false;
   }
 }

@@ -22,9 +22,15 @@ public abstract class MessengerHttpHandler implements HttpHandler {
 
   private RateLimiter rateLimiter;
   private final WebMessengerPlugin plugin;
+  private final boolean shouldAuthenticate;
 
   public MessengerHttpHandler(WebMessengerPlugin plugin) {
+    this(plugin, true);
+  }
+
+  public MessengerHttpHandler(WebMessengerPlugin plugin, boolean shouldAuthenticate) {
     this.plugin = plugin;
+    this.shouldAuthenticate = shouldAuthenticate;
   }
 
   public abstract RequestMetadata metadata();
@@ -48,7 +54,7 @@ public abstract class MessengerHttpHandler implements HttpHandler {
             .getResponseHeaders()
             .add("X-Ratelimit-Limit", String.valueOf(rateLimiter.settings().threshold()));
       }
-      if (shouldAuthenticate()) {
+      if (shouldAuthenticate) {
         if (!exchange.getRequestHeaders().containsKey("X-secret")) {
           this.handleGenericErrorResponse(exchange, "Forbidden", 403);
           return;
@@ -109,23 +115,22 @@ public abstract class MessengerHttpHandler implements HttpHandler {
   }
 
   protected void respond(HttpExchange exchange, CompletableFuture<JsonObject> response, int code) {
-    response.whenComplete(
-        (resp, ex) -> {
-          if (ex != null) {
-            plugin.getLogger().error("Exception during response", new RuntimeException(ex));
-            try {
-              handleGenericErrorResponse(exchange, "Internal Server Error", 500);
-            } catch (IOException e) {
-              plugin.getLogger().error("IO while trying to respond", e);
-            }
-            return;
-          }
-          try {
-            this.respond(exchange, resp, code);
-          } catch (IOException e) {
-            plugin.getLogger().error("IO while trying to respond", e);
-          }
-        });
+    response.whenComplete((resp, ex) -> {
+      if (ex != null) {
+        plugin.getLogger().error("Exception during response", new RuntimeException(ex));
+        try {
+          handleGenericErrorResponse(exchange, "Internal Server Error", 500);
+        } catch (IOException e) {
+          plugin.getLogger().error("IO while trying to respond", e);
+        }
+        return;
+      }
+      try {
+        this.respond(exchange, resp, code);
+      } catch (IOException e) {
+        plugin.getLogger().error("IO while trying to respond", e);
+      }
+    });
   }
 
   protected void respond(HttpExchange exchange, JsonElement response, int code) throws IOException {
@@ -146,9 +151,5 @@ public abstract class MessengerHttpHandler implements HttpHandler {
     if (!exchange.getResponseHeaders().containsKey("Content-Type")) {
       exchange.getResponseHeaders().add("Content-Type", "application/json; charset=utf-8");
     }
-  }
-
-  protected boolean shouldAuthenticate() {
-    return true;
   }
 }

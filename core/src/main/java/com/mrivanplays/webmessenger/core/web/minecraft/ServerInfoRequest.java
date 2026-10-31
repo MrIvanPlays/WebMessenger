@@ -37,13 +37,12 @@ public class ServerInfoRequest extends MessengerHttpHandler {
       this.respond(
           exchange,
           createResponseBody(getPlugin().getDataProvider())
-              .thenApply(
-                  obj -> {
-                    obj.addProperty(
-                        "serverSoftwareType",
-                        getPlugin().getDataProvider().type().name().toLowerCase(Locale.ROOT));
-                    return obj;
-                  }),
+              .thenApply(obj -> {
+                obj.addProperty(
+                    "serverSoftwareType",
+                    getPlugin().getDataProvider().type().name().toLowerCase(Locale.ROOT));
+                return obj;
+              }),
           200);
     } else {
       if (!getPlugin().getDataProvider().type().isProxy()) {
@@ -65,25 +64,24 @@ public class ServerInfoRequest extends MessengerHttpHandler {
   private CompletableFuture<JsonObject> createResponseBody(ServerInfo serverInfo) {
     return serverInfo
         .ping()
-        .thenApply(
-            (ping) -> {
-              if (ping == null) {
-                ping = new ServerPing("unknown", false, "unknown");
-              }
-              JsonObject responseBody = new JsonObject();
-              responseBody.addProperty("onlinePlayers", serverInfo.onlinePlayers());
-              responseBody.addProperty("serverVersion", ping.version());
-              responseBody.addProperty("motd", ping.motd());
-              responseBody.addProperty("online", ping.online());
-              JsonArray players = new JsonArray();
-              for (PlayerInfo playerInfo : getPlugin().getDataProvider().connectedPlayers()) {
-                JsonObject playerObj = new JsonObject();
-                playerObj.addProperty("name", playerInfo.name());
-                playerObj.addProperty("uuid", playerInfo.uuid().toString());
-                players.add(playerObj);
-              }
-              responseBody.add("players", players);
-              return responseBody;
-            });
+        .thenApply(ping -> {
+          if (ping == null) {
+            ping = new ServerPing("unknown", false, "unknown");
+          }
+          JsonObject responseBody = new JsonObject();
+          responseBody.addProperty("onlinePlayers", serverInfo.onlinePlayers());
+          responseBody.addProperty("serverVersion", ping.version());
+          responseBody.addProperty("motd", ping.motd());
+          responseBody.addProperty("online", ping.online());
+          JsonArray players = new JsonArray();
+          for (PlayerInfo playerInfo : getPlugin().getDataProvider().connectedPlayers()) {
+            JsonObject playerObj = new JsonObject();
+            playerObj.addProperty("name", playerInfo.name());
+            playerObj.addProperty("uuid", playerInfo.uuid().toString());
+            players.add(playerObj);
+          }
+          responseBody.add("players", players);
+          return responseBody;
+        });
   }
 }

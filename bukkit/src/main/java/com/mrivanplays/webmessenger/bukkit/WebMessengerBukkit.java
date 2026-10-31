@@ -13,7 +13,7 @@ public final class WebMessengerBukkit extends JavaPlugin {
     plugin =
         new WebMessengerPlugin(
             PluginLogger.fromJavaLogger(getLogger()), getDataPath(), getDescription().getVersion());
-    plugin.setAsyncExecutor((r) -> getServer().getScheduler().runTaskAsynchronously(this, r));
+    plugin.setAsyncExecutor(r -> getServer().getScheduler().runTaskAsynchronously(this, r));
     plugin.setDataProvider(new BukkitDataProvider(this));
     plugin.enable();
   }

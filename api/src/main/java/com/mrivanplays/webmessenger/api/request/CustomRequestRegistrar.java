@@ -40,8 +40,8 @@ public enum CustomRequestRegistrar {
   }
 
   /**
-   * Get the {@link RequestMetadata request metadata} of the provided route, if such
-   * {@link CustomRequest custom request} is registered.
+   * Get the {@link RequestMetadata request metadata} of the provided route, if such {@link
+   * CustomRequest custom request} is registered.
    *
    * @param route route to check
    * @return populated if present, empty if null

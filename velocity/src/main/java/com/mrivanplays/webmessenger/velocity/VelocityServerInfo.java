@@ -39,18 +39,17 @@ public class VelocityServerInfo implements ServerInfo {
   @Override
   public CompletableFuture<ServerPing> ping() {
     return con.ping()
-        .thenApply(
-            vPing -> {
-              if (vPing == null) {
-                return new ServerPing("unknown", false, "unknown");
-              }
-              return new ServerPing(
-                  vPing.getVersion().getName(),
-                  true,
-                  vPing.getDescriptionComponent() == null
-                      ? "unknown"
-                      : PlainTextComponentSerializer.plainText()
-                          .serialize(vPing.getDescriptionComponent()));
-            });
+        .thenApply(vPing -> {
+          if (vPing == null) {
+            return new ServerPing("unknown", false, "unknown");
+          }
+          return new ServerPing(
+              vPing.getVersion().getName(),
+              true,
+              vPing.getDescriptionComponent() == null
+                  ? "unknown"
+                  : PlainTextComponentSerializer.plainText()
+                      .serialize(vPing.getDescriptionComponent()));
+        });
   }
 }

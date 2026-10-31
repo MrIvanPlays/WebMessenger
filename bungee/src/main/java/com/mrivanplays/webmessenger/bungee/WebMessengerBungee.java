@@ -16,7 +16,7 @@ public final class WebMessengerBungee extends Plugin {
             getDataFolder().toPath(),
             getDescription().getVersion());
     plugin.setDataProvider(new BungeeDataProvider());
-    plugin.setAsyncExecutor((r) -> getProxy().getScheduler().runAsync(this, r));
+    plugin.setAsyncExecutor(r -> getProxy().getScheduler().runAsync(this, r));
     plugin.enable();
   }
 

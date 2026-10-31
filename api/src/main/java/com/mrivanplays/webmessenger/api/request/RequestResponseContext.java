@@ -1,7 +1,6 @@
 package com.mrivanplays.webmessenger.api.request;
 
 import com.google.gson.JsonElement;
-
 import com.mrivanplays.webmessenger.api.request.header.CustomHeader;
 import java.io.IOException;
 import java.io.InputStream;

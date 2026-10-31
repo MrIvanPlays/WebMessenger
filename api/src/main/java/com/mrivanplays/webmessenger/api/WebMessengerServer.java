@@ -4,8 +4,8 @@ import com.mrivanplays.webmessenger.api.ratelimit.RateLimiter;
 import java.util.Optional;
 
 /**
- * Represents a singleton class of accessing the WebMessenger
- * web server in a plugin controlled manner
+ * Represents a singleton class of accessing the WebMessenger web server in a plugin controlled
+ * manner
  */
 public abstract class WebMessengerServer {
 
@@ -27,6 +27,7 @@ public abstract class WebMessengerServer {
     }
     instance = newInstance;
   }
+
   //
 
   /**
@@ -37,8 +38,8 @@ public abstract class WebMessengerServer {
   public abstract Optional<RateLimiter> rateLimiter();
 
   /**
-   * Set a new rate limiter to be used for default route handlers
-   * which are bundled in the WebMessenger plugin
+   * Set a new rate limiter to be used for default route handlers which are bundled in the
+   * WebMessenger plugin
    *
    * @param rateLimiter new rate limiter
    */
@@ -52,8 +53,8 @@ public abstract class WebMessengerServer {
   public abstract String version();
 
   /**
-   * Get the Minecraft server {@link Platform} type
-   * on which the WebMessenger web server is running on.
+   * Get the Minecraft server {@link Platform} type on which the WebMessenger web server is running
+   * on.
    *
    * @return platform
    */

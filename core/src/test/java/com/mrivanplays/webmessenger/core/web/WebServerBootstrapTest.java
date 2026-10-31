@@ -39,7 +39,7 @@ public class WebServerBootstrapTest {
     EventBus.INSTANCE.registerListener(
         new Identifier("my", "pluginname"),
         CustomRequestRegisterEvent.class,
-        (event) -> {
+        event -> {
           plugin
               .getLogger()
               .info(
@@ -53,7 +53,7 @@ public class WebServerBootstrapTest {
     EventBus.INSTANCE.registerListener(
         new Identifier("my", "pluginname"),
         HttpRequestHandleEvent.class,
-        (event) -> {
+        event -> {
           plugin.getLogger().info("Handling request: " + event.context().metadata().route());
           event.handle(HandleableEvent.Response.unhandled());
         });
@@ -100,11 +100,6 @@ public class WebServerBootstrapTest {
           return CompletableFuture.completedFuture(new ServerPing("26.3", true, "MOTD"));
         }
       };
-    }
-
-    @Override
-    public boolean isProxy() {
-      return true;
     }
 
     @Override

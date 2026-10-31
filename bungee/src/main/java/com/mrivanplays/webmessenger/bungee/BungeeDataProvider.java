@@ -74,10 +74,9 @@ public class BungeeDataProvider implements ServerDataProvider {
   @Override
   public Collection<PlayerInfo> connectedPlayers() {
     return ProxyServer.getInstance().getPlayers().stream()
-        .map(
-            p ->
-                new PlayerInfo(
-                    p.getName(), p.getUniqueId(), new BungeeServerInfo(p.getServer().getInfo())))
+        .map(p ->
+            new PlayerInfo(
+                p.getName(), p.getUniqueId(), new BungeeServerInfo(p.getServer().getInfo())))
         .toList();
   }
 

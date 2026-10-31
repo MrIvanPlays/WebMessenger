@@ -5,10 +5,8 @@ import com.mrivanplays.webmessenger.core.WebMessengerPlugin;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
-import com.velocitypowered.api.plugin.PluginContainer;
 import com.velocitypowered.api.proxy.ProxyServer;
 import java.nio.file.Path;
-import java.util.Optional;
 import org.slf4j.Logger;
 
 public class WebMessengerVelocity {
@@ -24,12 +22,10 @@ public class WebMessengerVelocity {
   @Subscribe
   public void onProxyInitialization(ProxyInitializeEvent event) {
     plugin.setDataProvider(new VelocityDataProvider(server));
-    plugin.setAsyncExecutor((r) -> server.getScheduler().buildTask(this, r));
+    plugin.setAsyncExecutor(r -> server.getScheduler().buildTask(this, r));
     var cont = server.getPluginManager().getPlugin("webmessenger-velocity");
-    cont.ifPresent(
-        pluginContainer ->
-            plugin.setPluginVersion(
-                pluginContainer.getDescription().getVersion().orElse("unknown")));
+    cont.ifPresent(pluginContainer ->
+        plugin.setPluginVersion(pluginContainer.getDescription().getVersion().orElse("unknown")));
     plugin.enable();
   }
 
