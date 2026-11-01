@@ -6,11 +6,13 @@ import com.mrivanplays.webmessenger.api.event.EventListener;
 import com.mrivanplays.webmessenger.api.event.EventPriority;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.stream.IntStream;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -56,6 +58,11 @@ public class EventBusTest {
         event -> prioritizedListener.accept(EventPriority.FIRST, event));
   }
 
+  @AfterAll
+  static void shutdown() {
+    executor.shutdown();
+  }
+
   @Test
   void testFire() {
     TestEvent event = EventBus.INSTANCE.fire(new TestEvent());
@@ -67,6 +74,8 @@ public class EventBusTest {
   void testUnregister() {
     EventBus.INSTANCE.unregisterListener(CommonValues.TEST_IDENTIFIER, TestEvent.class);
     TestEvent event = EventBus.INSTANCE.fire(new TestEvent());
+    // register it back so other tests don't fail
+    EventBus.INSTANCE.registerListener(CommonValues.TEST_IDENTIFIER, TestEvent.class, listener);
 
     Assertions.assertEquals(0, event.called.get());
   }
@@ -82,12 +91,16 @@ public class EventBusTest {
   }
 
   @Test
-  void concurrencyTest() {
+  void concurrencyTest() throws InterruptedException, ExecutionException {
     TestEvent event = new TestEvent();
-    IntStream.range(0, 1001)
-        .forEach(_ ->
-            executor.submit(() -> {
-              EventBus.INSTANCE.fire(event);
-            }));
+    var futures =
+        IntStream.range(0, 1000)
+            .mapToObj(_ -> executor.submit(() -> EventBus.INSTANCE.fire(event)))
+            .toList();
+    for (var future : futures) {
+      future.get();
+    }
+
+    Assertions.assertEquals(1000, event.called.get());
   }
 }

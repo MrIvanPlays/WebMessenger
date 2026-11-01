@@ -1,25 +1,23 @@
 package com.mrivanplays.webmessenger.api.event;
 
 import com.mrivanplays.webmessenger.api.Identifier;
-import java.util.AbstractMap;
-import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 /** Represents a event bus, which is responsible for handling event listeners. */
 public enum EventBus {
   INSTANCE;
 
   private final Lock listenersLock = new ReentrantLock();
+  private final AtomicLong registrationSequence = new AtomicLong();
   private final Map<Class<? extends Event>, SortedSet<EventListenerIdentified>> listeners =
       new ConcurrentHashMap<>();
 
@@ -62,13 +60,16 @@ public enum EventBus {
       Identifier identifier, Class<T> eventClass, EventListener<T> listener) {
     listenersLock.lock();
     try {
-      SortedSet<EventListenerIdentified> eventListeners = this.listeners.remove(eventClass);
-      if (eventListeners == null) {
-        eventListeners =
-            new ConcurrentSkipListSet<>(Comparator.comparing(l -> l.listener().priority()));
-      }
-      eventListeners.add(new EventListenerIdentified(listener, identifier));
-      this.listeners.put(eventClass, eventListeners);
+      SortedSet<EventListenerIdentified> eventListeners =
+          this.listeners.computeIfAbsent(
+              eventClass,
+              _ ->
+                  new ConcurrentSkipListSet<>(
+                      Comparator.comparing((EventListenerIdentified l) -> l.listener().priority())
+                          .thenComparingLong(EventListenerIdentified::registrationSequence)));
+      eventListeners.add(
+          new EventListenerIdentified<>(
+              listener, identifier, registrationSequence.getAndIncrement()));
     } finally {
       listenersLock.unlock();
     }
@@ -85,16 +86,12 @@ public enum EventBus {
   public <T extends Event> void unregisterListener(Identifier identifier, Class<T> eventClass) {
     listenersLock.lock();
     try {
-      SortedSet<EventListenerIdentified> eventListeners = this.listeners.remove(eventClass);
+      SortedSet<EventListenerIdentified> eventListeners = this.listeners.get(eventClass);
       if (eventListeners == null) {
         return;
       }
       eventListeners.removeIf(eventListenerIdentified ->
           eventListenerIdentified.identifier().asName().equalsIgnoreCase(identifier.asName()));
-      if (eventListeners.isEmpty()) {
-        return;
-      }
-      this.listeners.put(eventClass, eventListeners);
     } finally {
       listenersLock.unlock();
     }
@@ -106,25 +103,11 @@ public enum EventBus {
    * @param identifier identifier registrator
    */
   public void unregisterListeners(Identifier identifier) {
-    List<Map.Entry<Class<? extends Event>, Set<EventListenerIdentified>>> toRemove =
-        new ArrayList<>();
     listenersLock.lock();
     try {
-      for (Map.Entry<Class<? extends Event>, SortedSet<EventListenerIdentified>> entry :
-          this.listeners.entrySet()) {
-        Set<EventListenerIdentified> listToRemove =
-            entry.getValue().stream()
-                .filter(l -> l.identifier().asName().equalsIgnoreCase(identifier.asName()))
-                .collect(Collectors.toSet());
-        toRemove.add(new AbstractMap.SimpleEntry<>(entry.getKey(), listToRemove));
-      }
-      for (Map.Entry<Class<? extends Event>, Set<EventListenerIdentified>> entryRemove : toRemove) {
-        SortedSet<EventListenerIdentified> current = this.listeners.remove(entryRemove.getKey());
-        current.removeAll(entryRemove.getValue());
-        if (current.isEmpty()) {
-          continue;
-        }
-        this.listeners.put(entryRemove.getKey(), current);
+      for (Set<EventListenerIdentified> eventListeners : this.listeners.values()) {
+        eventListeners.removeIf(
+            listener -> listener.identifier().asName().equalsIgnoreCase(identifier.asName()));
       }
     } finally {
       listenersLock.unlock();
@@ -139,10 +122,11 @@ public enum EventBus {
    * @param <T> event
    */
   public <T extends Event> T fire(T event) {
-    if (this.listeners.get(event.getClass()) == null) {
+    SortedSet<EventListenerIdentified> eventListeners = this.listeners.get(event.getClass());
+    if (eventListeners == null) {
       return event;
     }
-    for (EventListenerIdentified<T> listener : this.listeners.get(event.getClass())) {
+    for (EventListenerIdentified<T> listener : eventListeners) {
       listener.listener().handle(event);
     }
     return event;
