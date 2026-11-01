@@ -4,16 +4,24 @@ import com.mrivanplays.webmessenger.api.Identifier;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 /** Represents a event bus, which is responsible for handling event listeners. */
 public enum EventBus {
   INSTANCE;
 
-  private Map<Class<? extends Event>, List<EventListenerIdentified>> listeners = new HashMap<>();
+  private final Lock listenersLock = new ReentrantLock();
+  private final Map<Class<? extends Event>, SortedSet<EventListenerIdentified>> listeners =
+      new ConcurrentHashMap<>();
 
   /**
    * Register a new listener with a normal priority.
@@ -52,19 +60,18 @@ public enum EventBus {
    */
   public <T extends Event> void registerListener(
       Identifier identifier, Class<T> eventClass, EventListener<T> listener) {
-    List<EventListenerIdentified> eventListeners = this.listeners.remove(eventClass);
-    if (eventListeners == null) {
-      eventListeners = new ArrayList<>();
+    listenersLock.lock();
+    try {
+      SortedSet<EventListenerIdentified> eventListeners = this.listeners.remove(eventClass);
+      if (eventListeners == null) {
+        eventListeners =
+            new ConcurrentSkipListSet<>(Comparator.comparing(l -> l.listener().priority()));
+      }
+      eventListeners.add(new EventListenerIdentified(listener, identifier));
+      this.listeners.put(eventClass, eventListeners);
+    } finally {
+      listenersLock.unlock();
     }
-    eventListeners.add(new EventListenerIdentified(listener, identifier));
-    sortList(eventListeners);
-    this.listeners.put(eventClass, eventListeners);
-  }
-
-  private void sortList(List<EventListenerIdentified> list) {
-    list.sort(
-        Comparator.comparing(
-            eventListenerIdentified -> eventListenerIdentified.listener().priority()));
   }
 
   /**
@@ -76,18 +83,21 @@ public enum EventBus {
    * @param <T> event
    */
   public <T extends Event> void unregisterListener(Identifier identifier, Class<T> eventClass) {
-    List<EventListenerIdentified> eventListeners = this.listeners.remove(eventClass);
-    if (eventListeners == null) {
-      return;
+    listenersLock.lock();
+    try {
+      SortedSet<EventListenerIdentified> eventListeners = this.listeners.remove(eventClass);
+      if (eventListeners == null) {
+        return;
+      }
+      eventListeners.removeIf(eventListenerIdentified ->
+          eventListenerIdentified.identifier().asName().equalsIgnoreCase(identifier.asName()));
+      if (eventListeners.isEmpty()) {
+        return;
+      }
+      this.listeners.put(eventClass, eventListeners);
+    } finally {
+      listenersLock.unlock();
     }
-    eventListeners.stream()
-        .filter(l -> l.identifier().asName().equalsIgnoreCase(identifier.asName()))
-        .forEach(eventListeners::remove);
-    if (eventListeners.isEmpty()) {
-      return;
-    }
-    sortList(eventListeners);
-    this.listeners.put(eventClass, eventListeners);
   }
 
   /**
@@ -96,24 +106,28 @@ public enum EventBus {
    * @param identifier identifier registrator
    */
   public void unregisterListeners(Identifier identifier) {
-    List<Map.Entry<Class<? extends Event>, List<EventListenerIdentified>>> toRemove =
+    List<Map.Entry<Class<? extends Event>, Set<EventListenerIdentified>>> toRemove =
         new ArrayList<>();
-    for (Map.Entry<Class<? extends Event>, List<EventListenerIdentified>> entry :
-        this.listeners.entrySet()) {
-      List<EventListenerIdentified> listToRemove =
-          entry.getValue().stream()
-              .filter(l -> l.identifier().asName().equalsIgnoreCase(identifier.asName()))
-              .toList();
-      toRemove.add(new AbstractMap.SimpleEntry<>(entry.getKey(), listToRemove));
-    }
-    for (Map.Entry<Class<? extends Event>, List<EventListenerIdentified>> entryRemove : toRemove) {
-      List<EventListenerIdentified> current = this.listeners.remove(entryRemove.getKey());
-      current.removeAll(entryRemove.getValue());
-      if (current.isEmpty()) {
-        continue;
+    listenersLock.lock();
+    try {
+      for (Map.Entry<Class<? extends Event>, SortedSet<EventListenerIdentified>> entry :
+          this.listeners.entrySet()) {
+        Set<EventListenerIdentified> listToRemove =
+            entry.getValue().stream()
+                .filter(l -> l.identifier().asName().equalsIgnoreCase(identifier.asName()))
+                .collect(Collectors.toSet());
+        toRemove.add(new AbstractMap.SimpleEntry<>(entry.getKey(), listToRemove));
       }
-      sortList(current);
-      this.listeners.put(entryRemove.getKey(), current);
+      for (Map.Entry<Class<? extends Event>, Set<EventListenerIdentified>> entryRemove : toRemove) {
+        SortedSet<EventListenerIdentified> current = this.listeners.remove(entryRemove.getKey());
+        current.removeAll(entryRemove.getValue());
+        if (current.isEmpty()) {
+          continue;
+        }
+        this.listeners.put(entryRemove.getKey(), current);
+      }
+    } finally {
+      listenersLock.unlock();
     }
   }
 
