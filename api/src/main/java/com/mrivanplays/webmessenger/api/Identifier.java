@@ -1,6 +1,7 @@
 package com.mrivanplays.webmessenger.api;
 
 import java.util.Objects;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Represents a platform independent Minecraft {@code NamespacedKey} like identifier.
@@ -8,11 +9,17 @@ import java.util.Objects;
  * @param key key identifier (non-null)
  * @param value value (or slave) identifier of the key (non-null)
  */
-public record Identifier(String key, String value) {
+public record Identifier(@NotNull String key, @NotNull String value) {
 
   public Identifier {
     Objects.requireNonNull(key, "key");
     Objects.requireNonNull(value, "value");
+    if (key.isEmpty()) {
+      throw new IllegalArgumentException("key cannot be empty");
+    }
+    if (value.isEmpty()) {
+      throw new IllegalArgumentException("value cannot be empty");
+    }
   }
 
   /**
@@ -20,6 +27,7 @@ public record Identifier(String key, String value) {
    *
    * @return 'key:value'
    */
+  @NotNull
   public String asName() {
     return key + ":" + value;
   }

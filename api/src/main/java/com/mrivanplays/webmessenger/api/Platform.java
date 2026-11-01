@@ -1,5 +1,7 @@
 package com.mrivanplays.webmessenger.api;
 
+import org.jetbrains.annotations.NotNull;
+
 /**
  * Represents the platform the web messenger server is running on
  *
@@ -46,6 +48,7 @@ public enum Platform {
    *
    * @return pretty name
    */
+  @NotNull
   public String prettyName() {
     return this.prettyName;
   }

@@ -2,6 +2,8 @@ package com.mrivanplays.webmessenger.api.ratelimit;
 
 import java.net.InetSocketAddress;
 import java.time.Duration;
+import java.util.Objects;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Represents a rate limiter interface.
@@ -17,6 +19,7 @@ public interface RateLimiter {
    *
    * @return settings
    */
+  @NotNull
   Settings settings();
 
   /**
@@ -26,7 +29,7 @@ public interface RateLimiter {
    * @return shall return true if the address has not hit the criteria for rate limiting, false
    *     otherwise
    */
-  boolean process(InetSocketAddress address);
+  boolean process(@NotNull InetSocketAddress address);
 
   /**
    * Get the remaining requests of a specified {@link InetSocketAddress address} before that
@@ -35,14 +38,16 @@ public interface RateLimiter {
    * @param address address
    * @return remaining requests
    */
-  long remainingRequests(InetSocketAddress address);
+  long remainingRequests(@NotNull InetSocketAddress address);
 
   /** Represents settings of a rate limiter. */
   interface Settings {
 
-    static Settings of(Duration windowPeriod, long threshold) {
+    static Settings of(@NotNull Duration windowPeriod, long threshold) {
+      Objects.requireNonNull(windowPeriod, "windowPeriod");
       return new Settings() {
         @Override
+        @NotNull
         public Duration windowPeriod() {
           return windowPeriod;
         }
@@ -60,6 +65,7 @@ public interface RateLimiter {
      *
      * @return period duration
      */
+    @NotNull
     Duration windowPeriod();
 
     /**

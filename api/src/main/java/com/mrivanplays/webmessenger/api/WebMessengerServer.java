@@ -2,6 +2,8 @@ package com.mrivanplays.webmessenger.api;
 
 import com.mrivanplays.webmessenger.api.ratelimit.RateLimiter;
 import java.util.Optional;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Represents a singleton class of accessing the WebMessenger web server in a plugin controlled
@@ -43,13 +45,14 @@ public abstract class WebMessengerServer {
    *
    * @param rateLimiter new rate limiter
    */
-  public abstract void setRateLimiter(RateLimiter rateLimiter);
+  public abstract void setRateLimiter(@Nullable RateLimiter rateLimiter);
 
   /**
    * Get the WebMessenger plugin version
    *
    * @return plugin version
    */
+  @NotNull
   public abstract String version();
 
   /**
@@ -58,5 +61,6 @@ public abstract class WebMessengerServer {
    *
    * @return platform
    */
+  @NotNull
   public abstract Platform platform();
 }

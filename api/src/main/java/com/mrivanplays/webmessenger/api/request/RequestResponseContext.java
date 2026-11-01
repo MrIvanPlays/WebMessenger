@@ -6,25 +6,28 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.util.Optional;
+import org.jetbrains.annotations.NotNull;
 
 // todo: requires a bunch of documentation in order to guarantee proper API use
 public interface RequestResponseContext {
 
-  void writeResponse(JsonElement response) throws IOException;
+  void writeResponse(@NotNull JsonElement response) throws IOException;
 
-  Optional<String> attribute(String name);
+  Optional<String> attribute(@NotNull String name);
 
   void setResponseCode(int httpCode);
 
   Optional<InputStream> requestBody();
 
-  Optional<CustomHeader> requestHeader(String key);
+  Optional<CustomHeader> requestHeader(@NotNull String key);
 
-  void addResponseHeader(CustomHeader header);
+  void addResponseHeader(@NotNull CustomHeader header);
 
   boolean isDone();
 
+  @NotNull
   InetSocketAddress remoteAddress();
 
+  @NotNull
   RequestMetadata metadata();
 }

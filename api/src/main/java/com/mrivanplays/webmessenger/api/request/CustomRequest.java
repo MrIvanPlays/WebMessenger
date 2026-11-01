@@ -2,6 +2,8 @@ package com.mrivanplays.webmessenger.api.request;
 
 import com.mrivanplays.webmessenger.api.utils.ConsumerThrowable;
 import java.io.IOException;
+import java.util.Objects;
+import org.jetbrains.annotations.NotNull;
 
 /** Represents a custom request that the WebMessenger web server is going to handle. */
 public interface CustomRequest {
@@ -13,16 +15,21 @@ public interface CustomRequest {
    * @param consumer custom request handler
    * @return new {@code CustomRequest} instance
    */
+  @NotNull
   static CustomRequest functional(
-      RequestMetadata metadata, ConsumerThrowable<RequestResponseContext, IOException> consumer) {
+      @NotNull RequestMetadata metadata,
+      @NotNull ConsumerThrowable<RequestResponseContext, IOException> consumer) {
+    Objects.requireNonNull(metadata, "metadata");
+    Objects.requireNonNull(consumer, "consumer");
     return new CustomRequest() {
       @Override
+      @NotNull
       public RequestMetadata metadata() {
         return metadata;
       }
 
       @Override
-      public void handle(RequestResponseContext ctx) throws IOException {
+      public void handle(@NotNull RequestResponseContext ctx) throws IOException {
         consumer.accept(ctx);
       }
     };
@@ -33,6 +40,7 @@ public interface CustomRequest {
    *
    * @return metadata
    */
+  @NotNull
   RequestMetadata metadata();
 
   /**
@@ -42,5 +50,5 @@ public interface CustomRequest {
    * @param ctx response context
    * @throws IOException if an I/O error occurs
    */
-  void handle(RequestResponseContext ctx) throws IOException;
+  void handle(@NotNull RequestResponseContext ctx) throws IOException;
 }

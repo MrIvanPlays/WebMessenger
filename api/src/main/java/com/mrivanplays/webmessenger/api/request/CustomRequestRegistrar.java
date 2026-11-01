@@ -3,13 +3,17 @@ package com.mrivanplays.webmessenger.api.request;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import org.jetbrains.annotations.NotNull;
 
 /** Represents a registrar for {@link CustomRequest custom requests} */
 public enum CustomRequestRegistrar {
   INSTANCE;
 
-  private List<CustomRequest> registrar = new ArrayList<>();
+  private Set<CustomRequest> registrar = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
   /**
    * Register a new custom request
@@ -18,7 +22,8 @@ public enum CustomRequestRegistrar {
    * @throws IllegalArgumentException if the route given in the {@link RequestMetadata metadata} is
    *     already registered
    */
-  public void registerRequest(CustomRequest request) {
+  public void registerRequest(@NotNull CustomRequest request) {
+    Objects.requireNonNull(request, "request");
     if (!isRouteAvailable(request.metadata().route())) {
       throw new IllegalArgumentException(
           "Route '"
@@ -35,7 +40,11 @@ public enum CustomRequestRegistrar {
    * @param route route to check
    * @return true if available, false otherwise
    */
-  public boolean isRouteAvailable(String route) {
+  public boolean isRouteAvailable(@NotNull String route) {
+    Objects.requireNonNull(route, "route");
+    if (route.charAt(0) != '/') {
+      throw new IllegalArgumentException("route must start with '/'");
+    }
     return registrar.stream().noneMatch(c -> c.metadata().route().equalsIgnoreCase(route));
   }
 
@@ -46,7 +55,12 @@ public enum CustomRequestRegistrar {
    * @param route route to check
    * @return populated if present, empty if null
    */
-  public Optional<RequestMetadata> metadataOf(String route) {
+  @NotNull
+  public Optional<RequestMetadata> metadataOf(@NotNull String route) {
+    Objects.requireNonNull(route, "route");
+    if (route.charAt(0) != '/') {
+      throw new IllegalArgumentException("route must start with '/'");
+    }
     return registrar.stream()
         .filter(c -> c.metadata().route().equalsIgnoreCase(route))
         .findFirst()
@@ -54,11 +68,12 @@ public enum CustomRequestRegistrar {
   }
 
   /**
-   * Get an unmodifiable {@link List} copy of the registered {@link CustomRequest custom requests}
+   * Get an {@link List} copy of the registered {@link CustomRequest custom requests}. Modifying the
+   * returned list will NOT register a new request.
    *
    * @return list of registered requests
    */
   public List<CustomRequest> getRegistrar() {
-    return Collections.unmodifiableList(registrar);
+    return new ArrayList<>(registrar);
   }
 }

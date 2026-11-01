@@ -26,11 +26,11 @@ public class CustomRequestRegistration extends MessengerHttpHandler {
   @Override
   protected void handle0(HttpExchange exchange) throws IOException {
     List<CustomHeader> requiredHeaders = request.metadata().requiredHeaders();
-    if (!requiredHeaders.isEmpty()) {
+    if (requiredHeaders != null && !requiredHeaders.isEmpty()) {
       boolean shallHandle = true;
       for (CustomHeader header : requiredHeaders) {
         List<String> values = exchange.getRequestHeaders().getOrDefault(header.key(), null);
-        if (values == null) {
+        if (values == null || header.value() == null) {
           shallHandle = false;
           break;
         }

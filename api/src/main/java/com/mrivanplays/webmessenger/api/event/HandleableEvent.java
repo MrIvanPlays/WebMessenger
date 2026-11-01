@@ -1,5 +1,7 @@
 package com.mrivanplays.webmessenger.api.event;
 
+import org.jetbrains.annotations.NotNull;
+
 /**
  * Represents a handleable resulted event. When such event is handled (or {@link
  * Response#isHandled()} returns {@code true}), WebMessenger web server will not continue with
@@ -12,6 +14,7 @@ public interface HandleableEvent extends Event {
    *
    * @return response
    */
+  @NotNull
   Response response();
 
   /**
@@ -19,7 +22,7 @@ public interface HandleableEvent extends Event {
    *
    * @param response response
    */
-  void handle(Response response);
+  void handle(@NotNull Response response);
 
   interface Response {
 
@@ -28,7 +31,7 @@ public interface HandleableEvent extends Event {
      *
      * @return new response instance, returning {@link #isHandled()} {@code true}
      */
-    static Response handled() {
+    static @NotNull Response handled() {
       return () -> true;
     }
 
@@ -37,7 +40,7 @@ public interface HandleableEvent extends Event {
      *
      * @return new response instance, returning {@link #isHandled()} {@code false}
      */
-    static Response unhandled() {
+    static @NotNull Response unhandled() {
       return () -> false;
     }
 

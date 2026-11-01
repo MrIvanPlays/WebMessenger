@@ -1,6 +1,11 @@
 package com.mrivanplays.webmessenger.api.request.header;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Represents an HTTP Header to be used in {@link
@@ -15,8 +20,9 @@ public interface CustomHeader {
    * @param value header value
    * @return new custom header instance
    */
-  static CustomHeader ofSingleValue(String key, String value) {
-    return of(key, List.of(value));
+  @NotNull
+  static CustomHeader ofSingleValue(@NotNull String key, @Nullable String value) {
+    return of(key, value == null ? Collections.emptyList() : List.of(value));
   }
 
   /**
@@ -26,8 +32,9 @@ public interface CustomHeader {
    * @param values header values
    * @return new custom header instance
    */
-  static CustomHeader of(String key, String[] values) {
-    return of(key, List.of(values));
+  @NotNull
+  static CustomHeader of(@NotNull String key, @Nullable String[] values) {
+    return of(key, values == null ? Collections.emptyList() : Arrays.asList(values));
   }
 
   /**
@@ -37,14 +44,18 @@ public interface CustomHeader {
    * @param values header values
    * @return new custom header instance
    */
-  static CustomHeader of(String key, List<String> values) {
+  @NotNull
+  static CustomHeader of(@NotNull String key, @Nullable List<String> values) {
+    Objects.requireNonNull(key, "key");
     return new CustomHeader() {
       @Override
+      @NotNull
       public String key() {
         return key;
       }
 
       @Override
+      @Nullable
       public List<String> value() {
         return values;
       }
@@ -56,6 +67,7 @@ public interface CustomHeader {
    *
    * @return key
    */
+  @NotNull
   String key();
 
   /**
@@ -63,5 +75,6 @@ public interface CustomHeader {
    *
    * @return values
    */
+  @Nullable
   List<String> value();
 }

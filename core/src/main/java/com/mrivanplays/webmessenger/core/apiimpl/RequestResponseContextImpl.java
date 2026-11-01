@@ -14,6 +14,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -74,6 +75,7 @@ public class RequestResponseContextImpl implements RequestResponseContext {
 
   @Override
   public Optional<String> attribute(String name) {
+    Objects.requireNonNull(name, "name");
     return Optional.ofNullable(this.attributes.get(name));
   }
 
@@ -97,6 +99,7 @@ public class RequestResponseContextImpl implements RequestResponseContext {
 
   @Override
   public Optional<CustomHeader> requestHeader(String key) {
+    Objects.requireNonNull(key, "key");
     List<String> val = exchange.getRequestHeaders().get(key);
     if (val == null) {
       return Optional.empty();
@@ -114,6 +117,7 @@ public class RequestResponseContextImpl implements RequestResponseContext {
               + metadata.identifier().asName()
               + "')");
     }
+    Objects.requireNonNull(header, "header");
     this.responseHeaders.add(header);
   }
 

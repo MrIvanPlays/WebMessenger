@@ -1,5 +1,6 @@
 package com.mrivanplays.webmessenger.api.event;
 
+import java.util.Objects;
 import java.util.function.Consumer;
 
 /**
@@ -29,6 +30,8 @@ public interface EventListener<T extends Event> {
    * @param <T> event type
    */
   static <T extends Event> EventListener<T> of(EventPriority priority, Consumer<T> consumer) {
+    Objects.requireNonNull(priority, "priority");
+    Objects.requireNonNull(consumer, "consumer");
     return new EventListener<>() {
       @Override
       public EventPriority priority() {

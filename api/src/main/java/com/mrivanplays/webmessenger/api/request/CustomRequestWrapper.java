@@ -1,6 +1,7 @@
 package com.mrivanplays.webmessenger.api.request;
 
 import java.io.IOException;
+import org.jetbrains.annotations.NotNull;
 
 final class CustomRequestWrapper implements CustomRequest {
 
@@ -11,12 +12,13 @@ final class CustomRequestWrapper implements CustomRequest {
   }
 
   @Override
+  @NotNull
   public RequestMetadata metadata() {
     return wrapped.metadata();
   }
 
   @Override
-  public void handle(RequestResponseContext ctx) throws IOException {
+  public void handle(@NotNull RequestResponseContext ctx) throws IOException {
     Class<?> caller =
         StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE).getCallerClass();
     try {

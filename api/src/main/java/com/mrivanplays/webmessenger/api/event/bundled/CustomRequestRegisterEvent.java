@@ -2,6 +2,8 @@ package com.mrivanplays.webmessenger.api.event.bundled;
 
 import com.mrivanplays.webmessenger.api.event.HandleableEvent;
 import com.mrivanplays.webmessenger.api.request.RequestMetadata;
+import java.util.Objects;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Event, called when a {@link com.mrivanplays.webmessenger.api.request.CustomRequest custom
@@ -19,13 +21,15 @@ public class CustomRequestRegisterEvent implements HandleableEvent {
 
   /** {@inheritDoc} */
   @Override
+  @NotNull
   public Response response() {
     return this.response;
   }
 
   /** {@inheritDoc} */
   @Override
-  public void handle(Response response) {
+  public void handle(@NotNull Response response) {
+    Objects.requireNonNull(response, "response");
     this.response = response;
   }
 
