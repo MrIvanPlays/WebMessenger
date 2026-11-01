@@ -2,6 +2,7 @@ package com.mrivanplays.webmessenger.api.event;
 
 import java.util.Objects;
 import java.util.function.Consumer;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Represents a listener of an {@link Event}
@@ -17,7 +18,8 @@ public interface EventListener<T extends Event> {
    * @return new event listener instance
    * @param <T> event type
    */
-  static <T extends Event> EventListener<T> of(Consumer<T> consumer) {
+  @NotNull
+  static <T extends Event> EventListener<T> of(@NotNull Consumer<T> consumer) {
     return of(EventPriority.NORMAL, consumer);
   }
 
@@ -29,17 +31,20 @@ public interface EventListener<T extends Event> {
    * @return new event listener instance
    * @param <T> event type
    */
-  static <T extends Event> EventListener<T> of(EventPriority priority, Consumer<T> consumer) {
+  @NotNull
+  static <T extends Event> EventListener<T> of(
+      @NotNull EventPriority priority, @NotNull Consumer<T> consumer) {
     Objects.requireNonNull(priority, "priority");
     Objects.requireNonNull(consumer, "consumer");
     return new EventListener<>() {
       @Override
+      @NotNull
       public EventPriority priority() {
         return priority;
       }
 
       @Override
-      public void handle(T event) {
+      public void handle(@NotNull T event) {
         consumer.accept(event);
       }
     };
@@ -50,6 +55,7 @@ public interface EventListener<T extends Event> {
    *
    * @return priority
    */
+  @NotNull
   EventPriority priority();
 
   /**
@@ -58,5 +64,5 @@ public interface EventListener<T extends Event> {
    *
    * @param event event to handle
    */
-  void handle(T event);
+  void handle(@NotNull T event);
 }
