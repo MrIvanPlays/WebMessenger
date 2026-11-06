@@ -5,6 +5,7 @@ import com.mrivanplays.webmessenger.core.PlayerInfo;
 import com.mrivanplays.webmessenger.core.ServerDataProvider;
 import com.mrivanplays.webmessenger.core.ServerInfo;
 import com.mrivanplays.webmessenger.core.ServerPing;
+import com.mrivanplays.webmessenger.core.util.Either;
 import java.util.Collection;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -64,6 +65,31 @@ public class BungeeDataProvider implements ServerDataProvider {
   @Override
   public Platform type() {
     return Platform.BUNGEECORD;
+  }
+
+  @Override
+  public CompletableFuture<byte[]> retrieveCookieFor(Either<String, UUID> info, String cookie) {
+    var player =
+        info.type().isLeft()
+            ? ProxyServer.getInstance().getPlayer(info.left().get())
+            : ProxyServer.getInstance().getPlayer(info.right().get());
+    if (player == null) {
+      return CompletableFuture.completedFuture(null);
+    }
+    return player.retrieveCookie(cookie);
+  }
+
+  @Override
+  public boolean storeCookie(Either<String, UUID> info, String cookie, byte[] data) {
+    var player =
+        info.type().isLeft()
+            ? ProxyServer.getInstance().getPlayer(info.left().get())
+            : ProxyServer.getInstance().getPlayer(info.right().get());
+    if (player == null) {
+      return false;
+    }
+    player.storeCookie(cookie, data);
+    return true;
   }
 
   @Override

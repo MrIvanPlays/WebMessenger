@@ -3,6 +3,7 @@ package com.mrivanplays.webmessenger.core.web;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonSyntaxException;
 import com.mrivanplays.webmessenger.api.event.EventBus;
 import com.mrivanplays.webmessenger.api.event.bundled.HttpRequestHandleEvent;
 import com.mrivanplays.webmessenger.api.ratelimit.RateLimiter;
@@ -10,6 +11,7 @@ import com.mrivanplays.webmessenger.api.request.RequestMetadata;
 import com.mrivanplays.webmessenger.api.request.RequestType;
 import com.mrivanplays.webmessenger.core.WebMessengerPlugin;
 import com.mrivanplays.webmessenger.core.apiimpl.RequestResponseContextImpl;
+import com.mrivanplays.webmessenger.core.util.TwoValue;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import java.io.IOException;
@@ -64,14 +66,14 @@ public abstract class MessengerHttpHandler implements HttpHandler {
           this.handleGenericErrorResponse(exchange, "Forbidden", 403);
           return;
         }
-        if ((this.metadata().type() != RequestType.ALL)
-            && !exchange.getRequestMethod().equalsIgnoreCase(this.metadata().type().name())) {
-          this.handleGenericErrorResponse(
-              exchange,
-              "Expected " + this.metadata().type().name() + ", got " + exchange.getRequestMethod(),
-              400);
-          return;
-        }
+      }
+      if ((this.metadata().type() != RequestType.ALL)
+          && !exchange.getRequestMethod().equalsIgnoreCase(this.metadata().type().name())) {
+        this.handleGenericErrorResponse(
+            exchange,
+            "Expected " + this.metadata().type().name() + ", got " + exchange.getRequestMethod(),
+            400);
+        return;
       }
       HttpRequestHandleEvent event =
           EventBus.INSTANCE.fire(
@@ -114,7 +116,8 @@ public abstract class MessengerHttpHandler implements HttpHandler {
     this.respond(exchange, responseBody, code);
   }
 
-  protected void respond(HttpExchange exchange, CompletableFuture<JsonObject> response, int code) {
+  protected void respond(
+      HttpExchange exchange, CompletableFuture<JsonObject> response, Integer code) {
     response.whenComplete((resp, ex) -> {
       if (ex != null) {
         plugin.getLogger().error("Exception during response", new RuntimeException(ex));
@@ -130,6 +133,17 @@ public abstract class MessengerHttpHandler implements HttpHandler {
       } catch (IOException e) {
         plugin.getLogger().error("IO while trying to respond", e);
       }
+    });
+  }
+
+  protected void respond(
+      HttpExchange exchange, CompletableFuture<TwoValue<JsonObject, Integer>> response) {
+    response.whenComplete((resp, ex) -> {
+      if (ex != null) {
+        this.respond(exchange, CompletableFuture.failedFuture(ex), null);
+        return;
+      }
+      this.respond(exchange, CompletableFuture.completedFuture(resp.first()), resp.second());
     });
   }
 
@@ -151,5 +165,22 @@ public abstract class MessengerHttpHandler implements HttpHandler {
     if (!exchange.getResponseHeaders().containsKey("Content-Type")) {
       exchange.getResponseHeaders().add("Content-Type", "application/json; charset=utf-8");
     }
+  }
+
+  protected JsonObject readJsonObject(HttpExchange exchange) throws IOException {
+    if (exchange.getRequestBody() == null) {
+      handleGenericErrorResponse(exchange, "Expected JSON body for POST, got null", 400);
+      return null;
+    }
+    String body = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
+    JsonObject object;
+    try {
+      object = gson.fromJson(body, JsonObject.class);
+    } catch (JsonSyntaxException e) {
+      this.handleGenericErrorResponse(
+          exchange, "Bad request: JsonSyntaxException '" + e.getMessage() + "'", 400);
+      return null;
+    }
+    return object;
   }
 }

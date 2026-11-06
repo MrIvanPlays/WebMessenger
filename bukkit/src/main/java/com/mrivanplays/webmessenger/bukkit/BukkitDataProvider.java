@@ -7,10 +7,12 @@ import com.mrivanplays.webmessenger.core.PlayerInfo;
 import com.mrivanplays.webmessenger.core.ServerDataProvider;
 import com.mrivanplays.webmessenger.core.ServerInfo;
 import com.mrivanplays.webmessenger.core.ServerPing;
+import com.mrivanplays.webmessenger.core.util.Either;
 import java.util.Collection;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import org.bukkit.Bukkit;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 
 public class BukkitDataProvider implements ServerDataProvider {
@@ -54,6 +56,40 @@ public class BukkitDataProvider implements ServerDataProvider {
   @Override
   public Platform type() {
     return PlatformIdentifier.get();
+  }
+
+  @Override
+  public CompletableFuture<byte[]> retrieveCookieFor(Either<String, UUID> info, String cookie) {
+    var player =
+        info.type().isLeft()
+            ? Bukkit.getPlayer(info.left().get())
+            : Bukkit.getPlayer(info.right().get());
+    if (player == null) {
+      return CompletableFuture.completedFuture(null);
+    }
+    NamespacedKey constNamespacedKey;
+    if (cookie.contains(":")) {
+      var spl = cookie.split(":");
+      constNamespacedKey = new NamespacedKey(spl[0], spl[1]);
+    } else {
+      // TODO: Warn about usage of "minecraft:" prefix
+      constNamespacedKey = new NamespacedKey("minecraft", cookie);
+    }
+    return player.retrieveCookie(constNamespacedKey);
+  }
+
+  @Override
+  public boolean storeCookie(Either<String, UUID> info, String cookie, byte[] data) {
+    var player =
+        info.type().isLeft()
+            ? Bukkit.getPlayer(info.left().get())
+            : Bukkit.getPlayer(info.right().get());
+    if (player == null) {
+      return false;
+    }
+    var spl = cookie.split(":");
+    player.storeCookie(new NamespacedKey(spl[0], spl[1]), data);
+    return true;
   }
 
   @Override

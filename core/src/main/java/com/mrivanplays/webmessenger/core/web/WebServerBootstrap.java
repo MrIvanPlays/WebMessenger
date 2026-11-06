@@ -17,7 +17,9 @@ import com.mrivanplays.webmessenger.core.web.generic.NotFoundRequest;
 import com.mrivanplays.webmessenger.core.web.generic.RobotsTxtEndpoint;
 import com.mrivanplays.webmessenger.core.web.minecraft.PerformCommandRequest;
 import com.mrivanplays.webmessenger.core.web.minecraft.PlayerInfoRequest;
+import com.mrivanplays.webmessenger.core.web.minecraft.RetrieveCookieRequest;
 import com.mrivanplays.webmessenger.core.web.minecraft.ServerInfoRequest;
+import com.mrivanplays.webmessenger.core.web.minecraft.StoreCookieRequest;
 import com.sun.net.httpserver.HttpServer;
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -39,6 +41,8 @@ public class WebServerBootstrap extends WebMessengerServer {
     this.DEFAULT_HANDLERS.put("/executeCommand", new PerformCommandRequest(plugin));
     this.DEFAULT_HANDLERS.put("/", new NotFoundRequest(plugin));
     this.DEFAULT_HANDLERS.put("/robots.txt", new RobotsTxtEndpoint(plugin));
+    this.DEFAULT_HANDLERS.put("/retrieveCookie", new RetrieveCookieRequest(plugin));
+    this.DEFAULT_HANDLERS.put("/storeCookie", new StoreCookieRequest(plugin));
     AvailableRequestsRequest arr = new AvailableRequestsRequest(plugin);
     arr.populateDefaults(this.DEFAULT_HANDLERS);
     this.DEFAULT_HANDLERS.put("/availableRequests", arr);

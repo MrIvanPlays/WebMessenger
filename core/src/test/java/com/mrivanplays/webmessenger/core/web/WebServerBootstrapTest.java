@@ -18,10 +18,14 @@ import com.mrivanplays.webmessenger.core.ServerInfo;
 import com.mrivanplays.webmessenger.core.ServerPing;
 import com.mrivanplays.webmessenger.core.WebMessengerPlugin;
 import com.mrivanplays.webmessenger.core.log.PluginLogger;
+import com.mrivanplays.webmessenger.core.util.Either;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Logger;
@@ -105,6 +109,20 @@ public class WebServerBootstrapTest {
     @Override
     public Platform type() {
       return Platform.BUNGEECORD;
+    }
+
+    private Map<String, byte[]> cookies = new HashMap<>();
+
+    @Override
+    public CompletableFuture<byte[]> retrieveCookieFor(Either<String, UUID> info, String cookie) {
+      return CompletableFuture.completedFuture(cookies.getOrDefault(cookie, null));
+    }
+
+    @Override
+    public boolean storeCookie(Either<String, UUID> info, String cookie, byte[] data) {
+      cookies.put(cookie, data);
+      System.out.println("stored cookie " + new String(data, StandardCharsets.UTF_8));
+      return true;
     }
 
     @Override

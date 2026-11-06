@@ -37,7 +37,12 @@ public class PlayerInfoRequest extends MessengerHttpHandler {
     }
     PlayerInfo playerInfo;
     if (nameAttr == null) {
-      playerInfo = this.getPlugin().getDataProvider().playerInfo(UUID.fromString(uuidAttr));
+      try {
+        playerInfo = this.getPlugin().getDataProvider().playerInfo(UUID.fromString(uuidAttr));
+      } catch (IllegalArgumentException e) {
+        this.handleGenericErrorResponse(exchange, "Invalid uuid provided", 400);
+        return;
+      }
     } else {
       playerInfo = this.getPlugin().getDataProvider().playerInfo(nameAttr);
     }

@@ -1,13 +1,11 @@
 package com.mrivanplays.webmessenger.core.web.minecraft;
 
 import com.google.gson.JsonObject;
-import com.google.gson.JsonSyntaxException;
 import com.mrivanplays.webmessenger.api.request.RequestMetadata;
 import com.mrivanplays.webmessenger.core.WebMessengerPlugin;
 import com.mrivanplays.webmessenger.core.web.MessengerHttpHandler;
 import com.sun.net.httpserver.HttpExchange;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 
 public class PerformCommandRequest extends MessengerHttpHandler {
 
@@ -24,19 +22,12 @@ public class PerformCommandRequest extends MessengerHttpHandler {
     return metadata;
   }
 
+  // expected payload: "{"command":"<command to run>"}"
   @Override
   protected void handle0(HttpExchange exchange) throws IOException {
-    if (exchange.getRequestBody() == null) {
-      handleGenericErrorResponse(exchange, "Nothing provided to execute", 400);
-      return;
-    }
-    String body = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
-    JsonObject object;
-    try {
-      object = gson.fromJson(body, JsonObject.class);
-    } catch (JsonSyntaxException e) {
-      this.handleGenericErrorResponse(
-          exchange, "Bad request: JsonSyntaxException '" + e.getMessage() + "'", 400);
+    JsonObject object = this.readJsonObject(exchange);
+    if (object == null) {
+      // readJsonObject handled error already, return
       return;
     }
     if (object.isEmpty() || !object.has("command")) {
