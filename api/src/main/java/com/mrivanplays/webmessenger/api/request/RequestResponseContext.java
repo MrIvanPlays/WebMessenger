@@ -1,11 +1,16 @@
 package com.mrivanplays.webmessenger.api.request;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.mrivanplays.webmessenger.api.request.header.CustomHeader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
+import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 import java.util.Optional;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -29,6 +34,7 @@ import org.jetbrains.annotations.NotNull;
  * <p>A done RequestResponseContext is not able to do anything, as the original http exchange is
  * closed whenever a response has been written to the requestee.
  */
+@ApiStatus.NonExtendable
 public interface RequestResponseContext {
 
   /**
@@ -69,12 +75,40 @@ public interface RequestResponseContext {
   Optional<InputStream> requestBody();
 
   /**
+   * Read the request body as {@link JsonObject json object} if it's present.
+   *
+   * @param gson gson instance to parse from
+   * @return populated optional if present, empty optional otherwise
+   * @throws IOException if an i/o error occurs
+   */
+  default Optional<JsonObject> readRequestBodyAsJson(@NotNull Gson gson) throws IOException {
+    Objects.requireNonNull(gson, "gson");
+    var body = this.requestBody();
+    if (body.isEmpty()) {
+      return Optional.empty();
+    }
+    var stream = body.get();
+    return Optional.of(
+        gson.fromJson(new String(stream.readAllBytes(), StandardCharsets.UTF_8), JsonObject.class));
+  }
+
+  /**
    * Get a header (if available) which the request contains.
    *
    * @param key request header key
    * @return populated optional if present, empty optional otherwise
    */
   Optional<CustomHeader> requestHeader(@NotNull String key);
+
+  /**
+   * Utility method to directly check whether a request header is present
+   *
+   * @param key request header key
+   * @return true if present, false otherwise
+   */
+  default boolean hasRequestHeader(@NotNull String key) {
+    return requestHeader(key).isPresent();
+  }
 
   /**
    * Add a custom header to the response when written

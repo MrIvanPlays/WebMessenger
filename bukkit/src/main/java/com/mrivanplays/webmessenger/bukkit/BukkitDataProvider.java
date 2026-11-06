@@ -67,15 +67,8 @@ public class BukkitDataProvider implements ServerDataProvider {
     if (player == null) {
       return CompletableFuture.completedFuture(null);
     }
-    NamespacedKey constNamespacedKey;
-    if (cookie.contains(":")) {
-      var spl = cookie.split(":");
-      constNamespacedKey = new NamespacedKey(spl[0], spl[1]);
-    } else {
-      // TODO: Warn about usage of "minecraft:" prefix
-      constNamespacedKey = new NamespacedKey("minecraft", cookie);
-    }
-    return player.retrieveCookie(constNamespacedKey);
+    var spl = cookie.split(":");
+    return player.retrieveCookie(new NamespacedKey(spl[0], spl[1]));
   }
 
   @Override

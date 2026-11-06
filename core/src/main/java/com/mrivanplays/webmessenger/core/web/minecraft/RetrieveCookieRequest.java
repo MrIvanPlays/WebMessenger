@@ -46,6 +46,11 @@ public class RetrieveCookieRequest extends MessengerHttpHandler {
       super.handleGenericErrorResponse(exchange, "No cookie id provided", 404);
       return;
     }
+    if (!cookieIdAttr.contains(":")) {
+      super.handleGenericErrorResponse(
+          exchange, "Expected key:value cookie id style, got " + cookieIdAttr, 400);
+      return;
+    }
     Either<String, UUID> reqInfo;
     if (nameAttr != null) {
       reqInfo = Either.left(nameAttr);

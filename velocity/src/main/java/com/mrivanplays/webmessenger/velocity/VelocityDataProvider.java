@@ -76,14 +76,8 @@ public class VelocityDataProvider implements ServerDataProvider {
       return CompletableFuture.completedFuture(null);
     }
     var future = new CompletableFuture<byte[]>();
-    Key key;
-    if (cookie.contains(":")) {
-      var spl = cookie.split(":");
-      key = Key.key(spl[0], spl[1]);
-    } else {
-      // TODO: Warn about usage of "minecraft:" prefix
-      key = Key.key("minecraft", cookie);
-    }
+    var spl = cookie.split(":");
+    Key key = Key.key(spl[0], spl[1]);
     var cookiesMap =
         requestedCookiesFutures.computeIfAbsent(
             player.getUniqueId(), _ -> new ConcurrentHashMap<>());
