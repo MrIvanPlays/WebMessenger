@@ -58,6 +58,9 @@ public class RequestResponseContextImpl implements RequestResponseContext {
     if (!responseHeaders.isEmpty()) {
       for (CustomHeader header : responseHeaders) {
         List<String> values = header.value();
+        if (values == null || values.isEmpty()) {
+          continue;
+        }
         if (values.size() == 1) {
           exchange.getResponseHeaders().add(header.key(), values.getFirst());
         } else {
