@@ -18,7 +18,14 @@ public class StoreCookieRequest extends MessengerHttpHandler {
 
   public StoreCookieRequest(WebMessengerPlugin plugin) {
     super(plugin);
-    this.metadata = RequestMetadata.simplePost(WebMessengerPlugin.API_IDENTIFIER, "/storeCookie");
+    var desc =
+        """
+        Store a cookie to a specific player.
+        Expected POST payload: "{"cookieId":"<cookie:id>","data":"<base64 encoded cookie data>",
+        "forPlayer":"player name or uuid","playerDataType":"<the data type provided, either uuid or name>"}"
+        """;
+    this.metadata =
+        RequestMetadata.simplePost(WebMessengerPlugin.API_IDENTIFIER, "/storeCookie", desc);
   }
 
   @Override

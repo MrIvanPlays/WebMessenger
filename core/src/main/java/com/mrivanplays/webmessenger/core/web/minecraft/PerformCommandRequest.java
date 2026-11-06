@@ -14,7 +14,10 @@ public class PerformCommandRequest extends MessengerHttpHandler {
   public PerformCommandRequest(WebMessengerPlugin plugin) {
     super(plugin);
     this.metadata =
-        RequestMetadata.simplePost(WebMessengerPlugin.API_IDENTIFIER, "/executeCommand");
+        RequestMetadata.simplePost(
+            WebMessengerPlugin.API_IDENTIFIER,
+            "/executeCommand",
+            "Perform a command of your choice on the server. Expected JSON syntax on POST: {\"command\":\"<command to run>\"}");
   }
 
   @Override

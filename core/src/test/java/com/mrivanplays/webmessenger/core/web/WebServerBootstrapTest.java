@@ -3,12 +3,12 @@ package com.mrivanplays.webmessenger.core.web;
 import com.google.gson.JsonObject;
 import com.mrivanplays.webmessenger.api.Identifier;
 import com.mrivanplays.webmessenger.api.Platform;
+import com.mrivanplays.webmessenger.api.WebMessengerServer;
 import com.mrivanplays.webmessenger.api.event.EventBus;
 import com.mrivanplays.webmessenger.api.event.HandleableEvent;
 import com.mrivanplays.webmessenger.api.event.bundled.CustomRequestRegisterEvent;
 import com.mrivanplays.webmessenger.api.event.bundled.HttpRequestHandleEvent;
 import com.mrivanplays.webmessenger.api.request.CustomRequest;
-import com.mrivanplays.webmessenger.api.request.CustomRequestRegistrar;
 import com.mrivanplays.webmessenger.api.request.RequestMetadata;
 import com.mrivanplays.webmessenger.api.request.RequestResponseContext;
 import com.mrivanplays.webmessenger.api.request.RequestType;
@@ -28,6 +28,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 public class WebServerBootstrapTest {
@@ -39,7 +42,7 @@ public class WebServerBootstrapTest {
     plugin.setDataProvider(new TestSDPImpl());
     plugin.setAsyncExecutor(Runnable::run);
     plugin.enable();
-    CustomRequestRegistrar.INSTANCE.registerRequest(new CustomRequestTest());
+    this.registerCustomRequest();
     EventBus.INSTANCE.registerListener(
         new Identifier("my", "pluginname"),
         CustomRequestRegisterEvent.class,
@@ -61,6 +64,29 @@ public class WebServerBootstrapTest {
           plugin.getLogger().info("Handling request: " + event.context().metadata().route());
           event.handle(HandleableEvent.Response.unhandled());
         });
+  }
+
+  void registerCustomRequest() {
+    // since this is not a unit test file I have the possibility
+    // to add a bit of randomness just to be sure that requests register
+    // on runtime
+    //    int random = new Random().nextInt(1, 100);
+    //    System.out.println("random is " + random);
+    //    if (random < 50) {
+    //      // register now
+    //      CustomRequestRegistrar.INSTANCE.registerRequest(new CustomRequestTest());
+    //    } else {
+    // register after 30 seconds
+    try (ScheduledExecutorService scheduled = Executors.newSingleThreadScheduledExecutor()) {
+      scheduled.schedule(
+          () ->
+              WebMessengerServer.getInstance()
+                  .customRequestRegistrar()
+                  .registerRequest(new CustomRequestTest()),
+          30,
+          TimeUnit.SECONDS);
+    }
+    // }
   }
 
   class TestSDPImpl implements ServerDataProvider {

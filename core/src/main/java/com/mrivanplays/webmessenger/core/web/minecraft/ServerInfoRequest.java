@@ -21,7 +21,11 @@ public class ServerInfoRequest extends MessengerHttpHandler {
 
   public ServerInfoRequest(WebMessengerPlugin plugin) {
     super(plugin);
-    this.metadata = RequestMetadata.simpleGet(WebMessengerPlugin.API_IDENTIFIER, "/serverInfo");
+    this.metadata =
+        RequestMetadata.simpleGet(
+            WebMessengerPlugin.API_IDENTIFIER,
+            "/serverInfo",
+            "Get specific server information. If no server is provided, this will fallback to the proxy. Usage: /serverInfo?serverName=<server name>");
   }
 
   @Override

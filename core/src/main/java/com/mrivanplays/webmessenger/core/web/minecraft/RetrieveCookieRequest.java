@@ -19,7 +19,11 @@ public class RetrieveCookieRequest extends MessengerHttpHandler {
 
   public RetrieveCookieRequest(WebMessengerPlugin plugin) {
     super(plugin);
-    this.metadata = RequestMetadata.simpleGet(WebMessengerPlugin.API_IDENTIFIER, "/retrieveCookie");
+    this.metadata =
+        RequestMetadata.simpleGet(
+            WebMessengerPlugin.API_IDENTIFIER,
+            "/retrieveCookie",
+            "Get a stored cookie in a player's client in Base64 encoded string. Usage: /retrieveCookie?<name or uuid>=<name or uuid of player>&cookieId=<cookie:id>");
   }
 
   @Override

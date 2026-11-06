@@ -13,7 +13,9 @@ public class RobotsTxtEndpoint extends MessengerHttpHandler {
 
   public RobotsTxtEndpoint(WebMessengerPlugin plugin) {
     super(plugin, false);
-    this.metadata = RequestMetadata.simpleGet(WebMessengerPlugin.API_IDENTIFIER, "/robots.txt");
+    this.metadata =
+        RequestMetadata.simpleGet(
+            WebMessengerPlugin.API_IDENTIFIER, "/robots.txt", "Endpoint for robots.");
   }
 
   @Override

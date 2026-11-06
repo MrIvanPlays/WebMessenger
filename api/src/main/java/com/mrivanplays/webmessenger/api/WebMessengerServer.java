@@ -1,6 +1,7 @@
 package com.mrivanplays.webmessenger.api;
 
 import com.mrivanplays.webmessenger.api.ratelimit.RateLimiter;
+import com.mrivanplays.webmessenger.api.request.CustomRequestRegistrar;
 import java.util.Optional;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -63,4 +64,12 @@ public abstract class WebMessengerServer {
    */
   @NotNull
   public abstract Platform platform();
+
+  /**
+   * Get the registrar where to register custom requests
+   *
+   * @return custom request registrar
+   */
+  @NotNull
+  public abstract CustomRequestRegistrar customRequestRegistrar();
 }

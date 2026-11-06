@@ -1,19 +1,10 @@
 package com.mrivanplays.webmessenger.api.request;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import org.jetbrains.annotations.NotNull;
 
 /** Represents a registrar for {@link CustomRequest custom requests} */
-public enum CustomRequestRegistrar {
-  INSTANCE;
-
-  private Set<CustomRequest> registrar = Collections.newSetFromMap(new ConcurrentHashMap<>());
+public interface CustomRequestRegistrar {
 
   /**
    * Register a new custom request
@@ -22,17 +13,7 @@ public enum CustomRequestRegistrar {
    * @throws IllegalArgumentException if the route given in the {@link RequestMetadata metadata} is
    *     already registered
    */
-  public void registerRequest(@NotNull CustomRequest request) {
-    Objects.requireNonNull(request, "request");
-    if (!isRouteAvailable(request.metadata().route())) {
-      throw new IllegalArgumentException(
-          "Route '"
-              + request.metadata().route()
-              + "' is already registered by "
-              + metadataOf(request.metadata().route()).get().identifier().asName());
-    }
-    registrar.add(new CustomRequestWrapper(request));
-  }
+  void registerRequest(@NotNull CustomRequest request);
 
   /**
    * Check if a route is available
@@ -40,13 +21,7 @@ public enum CustomRequestRegistrar {
    * @param route route to check
    * @return true if available, false otherwise
    */
-  public boolean isRouteAvailable(@NotNull String route) {
-    Objects.requireNonNull(route, "route");
-    if (route.charAt(0) != '/') {
-      throw new IllegalArgumentException("route must start with '/'");
-    }
-    return registrar.stream().noneMatch(c -> c.metadata().route().equalsIgnoreCase(route));
-  }
+  boolean isRouteAvailable(@NotNull String route);
 
   /**
    * Get the {@link RequestMetadata request metadata} of the provided route, if such {@link
@@ -56,24 +31,5 @@ public enum CustomRequestRegistrar {
    * @return populated if present, empty if null
    */
   @NotNull
-  public Optional<RequestMetadata> metadataOf(@NotNull String route) {
-    Objects.requireNonNull(route, "route");
-    if (route.charAt(0) != '/') {
-      throw new IllegalArgumentException("route must start with '/'");
-    }
-    return registrar.stream()
-        .filter(c -> c.metadata().route().equalsIgnoreCase(route))
-        .findFirst()
-        .map(CustomRequest::metadata);
-  }
-
-  /**
-   * Get an {@link List} copy of the registered {@link CustomRequest custom requests}. Modifying the
-   * returned list will NOT register a new request.
-   *
-   * @return list of registered requests
-   */
-  public List<CustomRequest> getRegistrar() {
-    return new ArrayList<>(registrar);
-  }
+  Optional<RequestMetadata> metadataOf(@NotNull String route);
 }

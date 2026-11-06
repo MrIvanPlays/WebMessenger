@@ -17,7 +17,11 @@ public class PlayerInfoRequest extends MessengerHttpHandler {
 
   public PlayerInfoRequest(WebMessengerPlugin plugin) {
     super(plugin);
-    this.metadata = RequestMetadata.simpleGet(WebMessengerPlugin.API_IDENTIFIER, "/playerInfo");
+    this.metadata =
+        RequestMetadata.simpleGet(
+            WebMessengerPlugin.API_IDENTIFIER,
+            "/playerInfo",
+            "Get information on player. Usage: /playerInfo?<name or uuid>=<name or uuid of player>");
   }
 
   @Override

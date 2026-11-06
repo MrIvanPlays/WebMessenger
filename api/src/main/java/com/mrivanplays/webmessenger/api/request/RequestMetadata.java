@@ -4,12 +4,13 @@ import com.mrivanplays.webmessenger.api.Identifier;
 import com.mrivanplays.webmessenger.api.request.header.CustomHeader;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /** Represents a holder of metadata for a {@link CustomRequest custom request} */
-public interface RequestMetadata {
+@ApiStatus.NonExtendable
+public sealed interface RequestMetadata permits RequestMetadataImpl {
 
   /**
    * Create a simple metadata with a {@link RequestType#GET GET} request type
@@ -20,7 +21,20 @@ public interface RequestMetadata {
    */
   @NotNull
   static RequestMetadata simpleGet(@NotNull Identifier identifier, @NotNull String route) {
-    return of(identifier, route, RequestType.GET);
+    return simpleGet(identifier, route, null);
+  }
+
+  /**
+   * Create a simple metadata with a {@link RequestType#GET GET} request type
+   *
+   * @param identifier metadata creator identifier
+   * @param route route that the web server handles
+   * @return new request metadata
+   */
+  @NotNull
+  static RequestMetadata simpleGet(
+      @NotNull Identifier identifier, @NotNull String route, @Nullable String description) {
+    return of(identifier, route, RequestType.GET, description);
   }
 
   /**
@@ -32,7 +46,21 @@ public interface RequestMetadata {
    */
   @NotNull
   static RequestMetadata simplePost(@NotNull Identifier identifier, @NotNull String route) {
-    return of(identifier, route, RequestType.POST);
+    return simplePost(identifier, route, null);
+  }
+
+  /**
+   * Create a simple metadata with a {@link RequestType#POST POST} request type
+   *
+   * @param identifier metadata creator identifier
+   * @param route route that the web server handles
+   * @param description description
+   * @return new request metadata
+   */
+  @NotNull
+  static RequestMetadata simplePost(
+      @NotNull Identifier identifier, @NotNull String route, @Nullable String description) {
+    return of(identifier, route, RequestType.POST, description);
   }
 
   /**
@@ -59,6 +87,27 @@ public interface RequestMetadata {
    * @param identifier metadata creator identifier
    * @param route route that the web server handles
    * @param type request type
+   * @param description description
+   * @param headers required headers before the request is passed to {@link CustomRequest#handle}
+   * @return new request metadata
+   */
+  @NotNull
+  static RequestMetadata of(
+      @NotNull Identifier identifier,
+      @NotNull String route,
+      @NotNull RequestType type,
+      @Nullable String description,
+      @Nullable CustomHeader... headers) {
+    return of(
+        identifier, route, type, description, headers == null ? List.of() : Arrays.asList(headers));
+  }
+
+  /**
+   * Creates a new metadata
+   *
+   * @param identifier metadata creator identifier
+   * @param route route that the web server handles
+   * @param type request type
    * @param headers required headers before the request is passed to {@link CustomRequest#handle}
    * @return new request metadata
    * @throws NullPointerException if the identifier, the route or the request type are null
@@ -70,40 +119,29 @@ public interface RequestMetadata {
       @NotNull String route,
       @NotNull RequestType type,
       @Nullable List<CustomHeader> headers) {
-    Objects.requireNonNull(identifier, "identifier");
-    Objects.requireNonNull(route, "route");
-    Objects.requireNonNull(type, "type");
-    if (route.isEmpty()) {
-      throw new IllegalArgumentException("route cannot be empty");
-    }
-    if (route.charAt(0) != '/') {
-      throw new IllegalArgumentException("route must start with '/'");
-    }
-    return new RequestMetadata() {
-      @Override
-      @NotNull
-      public Identifier identifier() {
-        return identifier;
-      }
+    return of(identifier, route, type, null, headers);
+  }
 
-      @Override
-      @NotNull
-      public String route() {
-        return route;
-      }
-
-      @Override
-      @NotNull
-      public RequestType type() {
-        return type;
-      }
-
-      @Override
-      @Nullable
-      public List<CustomHeader> requiredHeaders() {
-        return headers;
-      }
-    };
+  /**
+   * Creates a new metadata
+   *
+   * @param identifier metadata creator identifier
+   * @param route route that the web server handles
+   * @param type request type
+   * @param description request description
+   * @param headers required headers before the request is passed to {@link CustomRequest#handle}
+   * @return new request metadata
+   * @throws NullPointerException if the identifier, the route or the request type are null
+   * @throws IllegalArgumentException if the route is empty or doesn't start with '/'
+   */
+  @NotNull
+  static RequestMetadata of(
+      @NotNull Identifier identifier,
+      @NotNull String route,
+      @NotNull RequestType type,
+      @Nullable String description,
+      @Nullable List<CustomHeader> headers) {
+    return new RequestMetadataImpl(identifier, route, type, headers, description);
   }
 
   /**
@@ -139,4 +177,15 @@ public interface RequestMetadata {
    */
   @Nullable
   List<CustomHeader> requiredHeaders();
+
+  /**
+   * Get basic description of what the request this metadata is for is doing.
+   *
+   * <p>An example to include in a description is usage ( "usage: /myCustomRequest?name=[name
+   * here]&customParam=[custom param]" )
+   *
+   * @return description, may be null
+   */
+  @Nullable
+  String description();
 }

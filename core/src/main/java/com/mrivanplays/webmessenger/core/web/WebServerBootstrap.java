@@ -9,9 +9,9 @@ import com.mrivanplays.webmessenger.api.event.bundled.WebServerPreStartupEvent;
 import com.mrivanplays.webmessenger.api.event.bundled.WebServerShutdownEvent;
 import com.mrivanplays.webmessenger.api.ratelimit.RateLimiter;
 import com.mrivanplays.webmessenger.api.ratelimit.SimpleRateLimiter;
-import com.mrivanplays.webmessenger.api.request.CustomRequest;
 import com.mrivanplays.webmessenger.api.request.CustomRequestRegistrar;
 import com.mrivanplays.webmessenger.core.WebMessengerPlugin;
+import com.mrivanplays.webmessenger.core.apiimpl.CustomRequestRegistrarImpl;
 import com.mrivanplays.webmessenger.core.web.generic.AvailableRequestsRequest;
 import com.mrivanplays.webmessenger.core.web.generic.NotFoundRequest;
 import com.mrivanplays.webmessenger.core.web.generic.RobotsTxtEndpoint;
@@ -33,9 +33,11 @@ public class WebServerBootstrap extends WebMessengerServer {
   private HttpServer server;
   private Map<String, MessengerHttpHandler> DEFAULT_HANDLERS = new HashMap<>();
   private RateLimiter rateLimiter;
+  private final CustomRequestRegistrarImpl customRequestRegistrar;
 
   public WebServerBootstrap(WebMessengerPlugin plugin) {
     this.plugin = plugin;
+    this.customRequestRegistrar = new CustomRequestRegistrarImpl();
     this.DEFAULT_HANDLERS.put("/playerInfo", new PlayerInfoRequest(plugin));
     this.DEFAULT_HANDLERS.put("/serverInfo", new ServerInfoRequest(plugin));
     this.DEFAULT_HANDLERS.put("/executeCommand", new PerformCommandRequest(plugin));
@@ -66,44 +68,6 @@ public class WebServerBootstrap extends WebMessengerServer {
         server.createContext(handlerEntry.getKey(), handlerEntry.getValue());
       }
 
-      for (CustomRequest entry : CustomRequestRegistrar.INSTANCE.getRegistrar()) {
-        if (DEFAULT_HANDLERS.keySet().stream()
-            .anyMatch(s -> s.equalsIgnoreCase(entry.metadata().route()))) {
-          plugin
-              .getLogger()
-              .warn(
-                  "Identifier '"
-                      + entry.metadata().identifier().asName()
-                      + "' tried to register a custom route for '"
-                      + entry.metadata().route()
-                      + "' and will be ignored.");
-          continue;
-        }
-        CustomRequestRegisterEvent event =
-            EventBus.INSTANCE.fire(new CustomRequestRegisterEvent(entry.metadata()));
-        if (event.response().isHandled()) {
-          continue;
-        }
-        plugin
-            .getLogger()
-            .debug(
-                "Registering handler '"
-                    + entry.metadata().route()
-                    + "' "
-                    + "with identifier '"
-                    + entry.metadata().identifier().asName());
-        server.createContext(
-            entry.metadata().route(), new CustomRequestRegistration(this.plugin, entry));
-        plugin
-            .getLogger()
-            .info(
-                "Identifier '"
-                    + entry.metadata().identifier().asName()
-                    + "' registered route '"
-                    + entry.metadata().route()
-                    + "'");
-      }
-
       server.setExecutor(plugin.getAsyncExecutor());
       server.start();
       plugin.getLogger().info("HTTP server running at port: " + plugin.getConfig().getPort());
@@ -114,6 +78,44 @@ public class WebServerBootstrap extends WebMessengerServer {
                   + plugin.getDataProvider().type().prettyName()
                   + " minecraft server software");
       EventBus.INSTANCE.fire(new WebServerPostStartupEvent());
+      CustomRequestRegistrarImpl.addObserver(req -> {
+        if (DEFAULT_HANDLERS.keySet().stream()
+            .anyMatch(s -> s.equalsIgnoreCase(req.metadata().route()))) {
+          plugin
+              .getLogger()
+              .warn(
+                  "Identifier '"
+                      + req.metadata().identifier().asName()
+                      + "' tried to register a custom route for '"
+                      + req.metadata().route()
+                      + "' and will be ignored.");
+          return;
+        }
+        CustomRequestRegisterEvent event =
+            EventBus.INSTANCE.fire(new CustomRequestRegisterEvent(req.metadata()));
+        if (event.response().isHandled()) {
+          return;
+        }
+        plugin
+            .getLogger()
+            .debug(
+                "Registering handler '"
+                    + req.metadata().route()
+                    + "' "
+                    + "with identifier '"
+                    + req.metadata().identifier().asName()
+                    + "'");
+        server.createContext(
+            req.metadata().route(), new CustomRequestRegistration(this.plugin, req));
+        plugin
+            .getLogger()
+            .info(
+                "Identifier '"
+                    + req.metadata().identifier().asName()
+                    + "' registered route '"
+                    + req.metadata().route()
+                    + "'");
+      });
     } catch (IOException e) {
       plugin.getLogger().error("Couldn't start server", e);
     }
@@ -151,5 +153,10 @@ public class WebServerBootstrap extends WebMessengerServer {
   @Override
   public Platform platform() {
     return plugin.getDataProvider().type();
+  }
+
+  @Override
+  public CustomRequestRegistrar customRequestRegistrar() {
+    return customRequestRegistrar;
   }
 }
