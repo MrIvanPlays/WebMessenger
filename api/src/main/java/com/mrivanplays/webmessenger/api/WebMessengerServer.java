@@ -3,6 +3,7 @@ package com.mrivanplays.webmessenger.api;
 import com.mrivanplays.webmessenger.api.ratelimit.RateLimiter;
 import com.mrivanplays.webmessenger.api.request.CustomRequestRegistrar;
 import java.util.Optional;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -20,13 +21,15 @@ public abstract class WebMessengerServer {
    *
    * @return depending on when accessed, may be null
    */
+  @Nullable
   public static WebMessengerServer getInstance() {
     return instance;
   }
 
-  public static void setInstance(WebMessengerServer newInstance) {
+  @ApiStatus.Internal
+  public static void setInstance(@NotNull WebMessengerServer newInstance) {
     if (instance != null) {
-      return;
+      throw new UnsupportedOperationException("WebMessengerServer has already been initialized.");
     }
     instance = newInstance;
   }
