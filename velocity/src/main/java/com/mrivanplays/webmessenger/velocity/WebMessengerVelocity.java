@@ -1,47 +1,56 @@
 package com.mrivanplays.webmessenger.velocity;
 
 import com.google.inject.Inject;
-import com.mrivanplays.webmessenger.core.WebMessengerPlugin;
+import com.mrivanplays.webmessenger.dependency.DependencyDownloader;
+import com.mrivanplays.webmessenger.dependency.DependencyResolver;
 import com.velocitypowered.api.event.Subscribe;
-import com.velocitypowered.api.event.player.CookieReceiveEvent;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
+import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import org.slf4j.Logger;
 
 public class WebMessengerVelocity {
-  private VelocityDataProvider dataProvider;
-  private WebMessengerPlugin plugin;
-  private ProxyServer server;
+  private final Logger slf4jLogger;
+  private final ProxyServer server;
+  private final Path dataDirectory;
 
   @Inject
-  public WebMessengerVelocity(Logger logger, ProxyServer server, Path dataDirectory) {
-    plugin = new WebMessengerPlugin(new VelocityPluginLogger(logger), dataDirectory);
+  public WebMessengerVelocity(
+      Logger logger, ProxyServer server, @DataDirectory Path dataDirectory) {
+    this.slf4jLogger = logger;
+    this.dataDirectory = dataDirectory;
     this.server = server;
   }
 
   @Subscribe
   public void onProxyInitialization(ProxyInitializeEvent event) {
-    dataProvider = new VelocityDataProvider(server);
-    plugin.setDataProvider(dataProvider);
-    plugin.setAsyncExecutor(r -> server.getScheduler().buildTask(this, r));
-    var cont = server.getPluginManager().getPlugin("webmessenger-velocity");
-    cont.ifPresent(pluginContainer ->
-        plugin.setPluginVersion(pluginContainer.getDescription().getVersion().orElse("unknown")));
-    plugin.enable();
-  }
-
-  @Subscribe
-  public void handleCookie(CookieReceiveEvent event) {
-    if (!dataProvider.completeCookieRequestFuture(
-        event.getOriginalKey(), event.getPlayer().getUniqueId(), event.getOriginalData())) {
-      event.setResult(CookieReceiveEvent.ForwardResult.handled());
+    if (!Files.exists(dataDirectory)) {
+      try {
+        Files.createDirectory(dataDirectory);
+      } catch (IOException e) {
+        slf4jLogger.error("Failed to create directory: " + dataDirectory, e);
+      }
     }
+    // load dependencies BEFORE doing anything else
+    // a hacky way not to import anything from downloaded libraries
+    DependencyDownloader.resolveDependencies(
+        DependencyResolver.resolveDependencies(
+            RepositoryLinkResolver.GSON,
+            getClass().getClassLoader().getResourceAsStream("dependencies.json")),
+        RepositoryLinkResolver.resolve(dataDirectory, getClass().getClassLoader()),
+        dataDirectory.resolve("dependencies"),
+        o -> slf4jLogger.error("Exception resolving dependencies", o),
+        p -> server.getPluginManager().addToClasspath(this, p));
+    com.mrivanplays.webmessenger.velocity.IsolatedVelocityPluginBootstrap.getInstance()
+        .boot(this, slf4jLogger, server, dataDirectory);
   }
 
   @Subscribe
   public void onShutdown(ProxyShutdownEvent event) {
-    plugin.disable();
+    com.mrivanplays.webmessenger.velocity.IsolatedVelocityPluginBootstrap.getInstance().shutdown();
   }
 }

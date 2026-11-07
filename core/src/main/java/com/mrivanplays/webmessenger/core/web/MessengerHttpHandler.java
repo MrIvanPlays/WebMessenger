@@ -4,8 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
-import com.mrivanplays.webmessenger.api.event.EventBus;
-import com.mrivanplays.webmessenger.api.event.bundled.HttpRequestHandleEvent;
+import com.mrivanplays.webmessenger.api.event.HttpRequestHandleEvent;
 import com.mrivanplays.webmessenger.api.ratelimit.RateLimiter;
 import com.mrivanplays.webmessenger.api.request.RequestMetadata;
 import com.mrivanplays.webmessenger.api.request.RequestType;
@@ -76,10 +75,12 @@ public abstract class MessengerHttpHandler implements HttpHandler {
         return;
       }
       HttpRequestHandleEvent event =
-          EventBus.INSTANCE.fire(
-              new HttpRequestHandleEvent(
-                  new RequestResponseContextImpl(exchange, this.gson, this.metadata())));
-      if (event.response().isHandled()) {
+          EBusInstance.get()
+              .fire(
+                  new HttpRequestHandleEvent(
+                      new RequestResponseContextImpl(exchange, this.gson, this.metadata())))
+              .join();
+      if (!event.result().allowed()) {
         return;
       }
       this.writeContentType(exchange);
@@ -120,7 +121,7 @@ public abstract class MessengerHttpHandler implements HttpHandler {
       HttpExchange exchange, CompletableFuture<JsonObject> response, Integer code) {
     response.whenComplete((resp, ex) -> {
       if (ex != null) {
-        plugin.getLogger().error("Exception during response", new RuntimeException(ex));
+        plugin.getLogger().error("Exception during response", ex);
         try {
           handleGenericErrorResponse(exchange, "Internal Server Error", 500);
         } catch (IOException e) {

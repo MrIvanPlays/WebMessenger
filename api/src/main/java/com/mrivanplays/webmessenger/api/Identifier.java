@@ -1,5 +1,6 @@
 package com.mrivanplays.webmessenger.api;
 
+import com.mrivanplays.events.ListenerIdentifier;
 import java.util.Objects;
 import org.jetbrains.annotations.NotNull;
 
@@ -9,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
  * @param key key identifier (non-null)
  * @param value value (or slave) identifier of the key (non-null)
  */
-public record Identifier(@NotNull String key, @NotNull String value) {
+public record Identifier(@NotNull String key, @NotNull String value) implements ListenerIdentifier {
 
   public Identifier {
     Objects.requireNonNull(key, "key");
@@ -30,5 +31,13 @@ public record Identifier(@NotNull String key, @NotNull String value) {
   @NotNull
   public String asName() {
     return key + ":" + value;
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public boolean matches(ListenerIdentifier other) {
+    if (!(other instanceof Identifier identified)) return false;
+    if (identified == this) return true;
+    return identified.key().equals(key) && identified.value().equals(value);
   }
 }

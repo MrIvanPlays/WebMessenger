@@ -1,6 +1,6 @@
-package com.mrivanplays.webmessenger.api.event.bundled;
+package com.mrivanplays.webmessenger.api.event;
 
-import com.mrivanplays.webmessenger.api.event.HandleableEvent;
+import com.mrivanplays.events.ResultedEvent;
 import com.mrivanplays.webmessenger.api.request.RequestMetadata;
 import java.util.Objects;
 import org.jetbrains.annotations.NotNull;
@@ -9,28 +9,24 @@ import org.jetbrains.annotations.NotNull;
  * Event, called when a {@link com.mrivanplays.webmessenger.api.request.CustomRequest custom
  * request} is registered to the WebMessenger web server
  */
-public class CustomRequestRegisterEvent implements HandleableEvent {
+public class CustomRequestRegisterEvent implements ResultedEvent<ResultedEvent.GenericResult> {
 
-  private Response response;
+  private GenericResult result;
   private final RequestMetadata requestMetadata;
 
   public CustomRequestRegisterEvent(RequestMetadata requestMetadata) {
-    this.response = Response.unhandled();
+    this.result = GenericResult.ALLOWED;
     this.requestMetadata = requestMetadata;
   }
 
-  /** {@inheritDoc} */
   @Override
-  @NotNull
-  public Response response() {
-    return this.response;
+  public @NotNull GenericResult result() {
+    return result;
   }
 
-  /** {@inheritDoc} */
   @Override
-  public void handle(@NotNull Response response) {
-    Objects.requireNonNull(response, "response");
-    this.response = response;
+  public void setResult(@NotNull ResultedEvent.GenericResult newResult) {
+    this.result = Objects.requireNonNull(newResult, "newResult");
   }
 
   /**

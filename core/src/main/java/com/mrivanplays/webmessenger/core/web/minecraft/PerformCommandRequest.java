@@ -43,9 +43,7 @@ public class PerformCommandRequest extends MessengerHttpHandler {
         .performCommand(command)
         .whenComplete((resp, e) -> {
           if (e != null) {
-            getPlugin()
-                .getLogger()
-                .error("Exception when performing command", new RuntimeException(e));
+            getPlugin().getLogger().error("Exception when performing command", e);
             return;
           }
           JsonObject response = new JsonObject();

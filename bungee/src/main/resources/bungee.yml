@@ -2,3 +2,5 @@ name: WebMessenger
 version: '${version}'
 main: com.mrivanplays.webmessenger.bungee.WebMessengerBungee
 author: Ivan Pekov
+libraries:
+  - com.mrivanplays:events:1.0.0

@@ -12,9 +12,7 @@ public interface PluginLogger {
 
   void warn(String message);
 
-  void error(String message);
-
-  void error(String message, Exception e);
+  void error(String message, Throwable e);
 
   void debug(String message);
 

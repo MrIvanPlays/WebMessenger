@@ -1,5 +1,6 @@
 package com.mrivanplays.webmessenger.api;
 
+import com.mrivanplays.events.EventBus;
 import com.mrivanplays.webmessenger.api.ratelimit.RateLimiter;
 import com.mrivanplays.webmessenger.api.request.CustomRequestRegistrar;
 import java.util.Optional;
@@ -75,4 +76,12 @@ public abstract class WebMessengerServer {
    */
   @NotNull
   public abstract CustomRequestRegistrar customRequestRegistrar();
+
+  /**
+   * Get the event bus of this server for listening to the packaged events with the WebMessenger API
+   *
+   * @return event bus
+   */
+  @NotNull
+  public abstract EventBus eventBus();
 }

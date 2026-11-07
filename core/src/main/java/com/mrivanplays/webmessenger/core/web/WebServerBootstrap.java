@@ -1,17 +1,16 @@
 package com.mrivanplays.webmessenger.core.web;
 
+import com.mrivanplays.events.EventBus;
 import com.mrivanplays.webmessenger.api.Platform;
 import com.mrivanplays.webmessenger.api.WebMessengerServer;
-import com.mrivanplays.webmessenger.api.event.EventBus;
-import com.mrivanplays.webmessenger.api.event.bundled.CustomRequestRegisterEvent;
-import com.mrivanplays.webmessenger.api.event.bundled.WebServerPostStartupEvent;
-import com.mrivanplays.webmessenger.api.event.bundled.WebServerPreStartupEvent;
-import com.mrivanplays.webmessenger.api.event.bundled.WebServerShutdownEvent;
+import com.mrivanplays.webmessenger.api.event.CustomRequestRegisterEvent;
+import com.mrivanplays.webmessenger.api.event.WebServerShutdownEvent;
 import com.mrivanplays.webmessenger.api.ratelimit.RateLimiter;
 import com.mrivanplays.webmessenger.api.ratelimit.SimpleRateLimiter;
 import com.mrivanplays.webmessenger.api.request.CustomRequestRegistrar;
 import com.mrivanplays.webmessenger.core.WebMessengerPlugin;
 import com.mrivanplays.webmessenger.core.apiimpl.CustomRequestRegistrarImpl;
+import com.mrivanplays.webmessenger.core.log.EventBusExceptionLogger;
 import com.mrivanplays.webmessenger.core.web.generic.AvailableRequestsRequest;
 import com.mrivanplays.webmessenger.core.web.generic.NotFoundRequest;
 import com.mrivanplays.webmessenger.core.web.generic.RobotsTxtEndpoint;
@@ -34,6 +33,7 @@ public class WebServerBootstrap extends WebMessengerServer {
   private Map<String, MessengerHttpHandler> DEFAULT_HANDLERS = new HashMap<>();
   private RateLimiter rateLimiter;
   private final CustomRequestRegistrarImpl customRequestRegistrar;
+  private EventBus eventBus;
 
   public WebServerBootstrap(WebMessengerPlugin plugin) {
     this.plugin = plugin;
@@ -51,7 +51,10 @@ public class WebServerBootstrap extends WebMessengerServer {
   }
 
   public void boot() {
-    EventBus.INSTANCE.fire(new WebServerPreStartupEvent());
+    eventBus =
+        EventBus.createAsyncEventBus(
+            plugin.getAsyncExecutor(), new EventBusExceptionLogger(plugin.getLogger()));
+    EBusInstance.set(eventBus);
     if (plugin.getConfig().isRateLimitEnabled()) {
       if (rateLimiter == null) {
         this.setRateLimiter(
@@ -77,7 +80,6 @@ public class WebServerBootstrap extends WebMessengerServer {
               "Running on "
                   + plugin.getDataProvider().type().prettyName()
                   + " minecraft server software");
-      EventBus.INSTANCE.fire(new WebServerPostStartupEvent());
       CustomRequestRegistrarImpl.addObserver(req -> {
         if (DEFAULT_HANDLERS.keySet().stream()
             .anyMatch(s -> s.equalsIgnoreCase(req.metadata().route()))) {
@@ -91,30 +93,32 @@ public class WebServerBootstrap extends WebMessengerServer {
                       + "' and will be ignored.");
           return;
         }
-        CustomRequestRegisterEvent event =
-            EventBus.INSTANCE.fire(new CustomRequestRegisterEvent(req.metadata()));
-        if (event.response().isHandled()) {
-          return;
-        }
-        plugin
-            .getLogger()
-            .debug(
-                "Registering handler '"
-                    + req.metadata().route()
-                    + "' "
-                    + "with identifier '"
-                    + req.metadata().identifier().asName()
-                    + "'");
-        server.createContext(
-            req.metadata().route(), new CustomRequestRegistration(this.plugin, req));
-        plugin
-            .getLogger()
-            .info(
-                "Identifier '"
-                    + req.metadata().identifier().asName()
-                    + "' registered route '"
-                    + req.metadata().route()
-                    + "'");
+        eventBus
+            .fire(new CustomRequestRegisterEvent(req.metadata()))
+            .whenComplete((event, _) -> {
+              if (!event.result().allowed()) {
+                return;
+              }
+              plugin
+                  .getLogger()
+                  .debug(
+                      "Registering handler '"
+                          + req.metadata().route()
+                          + "' "
+                          + "with identifier '"
+                          + req.metadata().identifier().asName()
+                          + "'");
+              server.createContext(
+                  req.metadata().route(), new CustomRequestRegistration(this.plugin, req));
+              plugin
+                  .getLogger()
+                  .info(
+                      "Identifier '"
+                          + req.metadata().identifier().asName()
+                          + "' registered route '"
+                          + req.metadata().route()
+                          + "'");
+            });
       });
     } catch (IOException e) {
       plugin.getLogger().error("Couldn't start server", e);
@@ -126,7 +130,7 @@ public class WebServerBootstrap extends WebMessengerServer {
       plugin.getLogger().info("Waiting on HTTP server to shutdown");
       server.stop(2);
       plugin.getLogger().info("HTTP server shutdown success");
-      EventBus.INSTANCE.fire(new WebServerShutdownEvent());
+      eventBus.fireAndForget(new WebServerShutdownEvent());
     }
   }
 
@@ -158,5 +162,10 @@ public class WebServerBootstrap extends WebMessengerServer {
   @Override
   public CustomRequestRegistrar customRequestRegistrar() {
     return customRequestRegistrar;
+  }
+
+  @Override
+  public EventBus eventBus() {
+    return this.eventBus;
   }
 }

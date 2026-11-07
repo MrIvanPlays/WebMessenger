@@ -1,32 +1,30 @@
-package com.mrivanplays.webmessenger.api.event.bundled;
+package com.mrivanplays.webmessenger.api.event;
 
-import com.mrivanplays.webmessenger.api.event.HandleableEvent;
+import com.mrivanplays.events.ResultedEvent;
 import com.mrivanplays.webmessenger.api.request.RequestResponseContext;
 import java.util.Objects;
 import org.jetbrains.annotations.NotNull;
 
 /** Event, called when a HTTP request is to be handled by the WebMessenger web server */
-public class HttpRequestHandleEvent implements HandleableEvent {
+public class HttpRequestHandleEvent implements ResultedEvent<ResultedEvent.GenericResult> {
   private final RequestResponseContext ctx;
-  private Response response;
+  private GenericResult result;
 
   public HttpRequestHandleEvent(@NotNull RequestResponseContext ctx) {
     this.ctx = Objects.requireNonNull(ctx, "context");
-    this.response = Response.unhandled();
-  }
-
-  /** {@inheritDoc} */
-  @NotNull
-  @Override
-  public Response response() {
-    return this.response;
+    this.result = GenericResult.ALLOWED;
   }
 
   /** {@inheritDoc} */
   @Override
-  public void handle(@NotNull Response response) {
-    Objects.requireNonNull(response, "response");
-    this.response = response;
+  public @NotNull GenericResult result() {
+    return result;
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void setResult(@NotNull ResultedEvent.GenericResult newResult) {
+    this.result = Objects.requireNonNull(newResult, "newResult");
   }
 
   /**

@@ -23,12 +23,7 @@ public class JavaPluginLogger implements PluginLogger {
   }
 
   @Override
-  public void error(String message) {
-    parent.severe(message);
-  }
-
-  @Override
-  public void error(String message, Exception e) {
+  public void error(String message, Throwable e) {
     parent.log(Level.SEVERE, message, e);
   }
 

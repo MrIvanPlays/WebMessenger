@@ -6,3 +6,6 @@ api-version: '26.3'
 load: POSTWORLD
 
 authors: [ Ivan Pekov ]
+libraries:
+  - com.mrivanplays:events:1.0.0
+

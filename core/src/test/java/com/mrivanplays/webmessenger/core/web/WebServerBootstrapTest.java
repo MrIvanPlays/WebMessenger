@@ -1,13 +1,14 @@
 package com.mrivanplays.webmessenger.core.web;
 
 import com.google.gson.JsonObject;
+import com.mrivanplays.events.reflection.Subscribe;
+import com.mrivanplays.events.reflection.SubscribedEventListenerBakery;
 import com.mrivanplays.webmessenger.api.Identifier;
 import com.mrivanplays.webmessenger.api.Platform;
 import com.mrivanplays.webmessenger.api.WebMessengerServer;
-import com.mrivanplays.webmessenger.api.event.EventBus;
-import com.mrivanplays.webmessenger.api.event.HandleableEvent;
-import com.mrivanplays.webmessenger.api.event.bundled.CustomRequestRegisterEvent;
-import com.mrivanplays.webmessenger.api.event.bundled.HttpRequestHandleEvent;
+import com.mrivanplays.webmessenger.api.event.CustomRequestRegisterEvent;
+import com.mrivanplays.webmessenger.api.event.HttpRequestHandleEvent;
+import com.mrivanplays.webmessenger.api.event.WMSubscriptionEventListener;
 import com.mrivanplays.webmessenger.api.request.CustomRequest;
 import com.mrivanplays.webmessenger.api.request.RequestMetadata;
 import com.mrivanplays.webmessenger.api.request.RequestResponseContext;
@@ -26,6 +27,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
@@ -35,6 +37,37 @@ import java.util.logging.Logger;
 
 public class WebServerBootstrapTest {
 
+  static class EventListener implements WMSubscriptionEventListener {
+
+    private WebMessengerPlugin plugin;
+
+    public EventListener(WebMessengerPlugin plugin) {
+      this.plugin = plugin;
+    }
+
+    @Override
+    public Identifier webMessengerIdentifier() {
+      return new Identifier("my", "pluginname");
+    }
+
+    @Subscribe
+    public void onCustomRequest(CustomRequestRegisterEvent event) {
+      plugin
+          .getLogger()
+          .info(
+              "'"
+                  + event.requestMetadata().identifier().asName()
+                  + " ' registered for route '"
+                  + event.requestMetadata().route()
+                  + "'");
+    }
+
+    @Subscribe
+    public void onHandle(HttpRequestHandleEvent event) {
+      plugin.getLogger().info("Handling request: " + event.context().metadata().route());
+    }
+  }
+
   void main(String[] args) {
     WebMessengerPlugin plugin =
         new WebMessengerPlugin(
@@ -43,50 +76,33 @@ public class WebServerBootstrapTest {
     plugin.setAsyncExecutor(Runnable::run);
     plugin.enable();
     this.registerCustomRequest();
-    EventBus.INSTANCE.registerListener(
-        new Identifier("my", "pluginname"),
-        CustomRequestRegisterEvent.class,
-        event -> {
-          plugin
-              .getLogger()
-              .info(
-                  "'"
-                      + event.requestMetadata().identifier().asName()
-                      + " ' registered for route '"
-                      + event.requestMetadata().route()
-                      + "'");
-          event.handle(HandleableEvent.Response.unhandled());
-        });
-    EventBus.INSTANCE.registerListener(
-        new Identifier("my", "pluginname"),
-        HttpRequestHandleEvent.class,
-        event -> {
-          plugin.getLogger().info("Handling request: " + event.context().metadata().route());
-          event.handle(HandleableEvent.Response.unhandled());
-        });
+    SubscribedEventListenerBakery.registerListeners(
+        WebMessengerServer.getInstance().eventBus(), new EventListener(plugin));
   }
 
   void registerCustomRequest() {
     // since this is not a unit test file I have the possibility
     // to add a bit of randomness just to be sure that requests register
     // on runtime
-    //    int random = new Random().nextInt(1, 100);
-    //    System.out.println("random is " + random);
-    //    if (random < 50) {
-    //      // register now
-    //      CustomRequestRegistrar.INSTANCE.registerRequest(new CustomRequestTest());
-    //    } else {
-    // register after 30 seconds
-    try (ScheduledExecutorService scheduled = Executors.newSingleThreadScheduledExecutor()) {
-      scheduled.schedule(
-          () ->
-              WebMessengerServer.getInstance()
-                  .customRequestRegistrar()
-                  .registerRequest(new CustomRequestTest()),
-          30,
-          TimeUnit.SECONDS);
+    int random = new Random().nextInt(1, 100);
+    System.out.println("random is " + random);
+    if (random < 50) {
+      // register now
+      WebMessengerServer.getInstance()
+          .customRequestRegistrar()
+          .registerRequest(new CustomRequestTest());
+    } else {
+      // register after 30 seconds
+      try (ScheduledExecutorService scheduled = Executors.newSingleThreadScheduledExecutor()) {
+        scheduled.schedule(
+            () ->
+                WebMessengerServer.getInstance()
+                    .customRequestRegistrar()
+                    .registerRequest(new CustomRequestTest()),
+            30,
+            TimeUnit.SECONDS);
+      }
     }
-    // }
   }
 
   class TestSDPImpl implements ServerDataProvider {

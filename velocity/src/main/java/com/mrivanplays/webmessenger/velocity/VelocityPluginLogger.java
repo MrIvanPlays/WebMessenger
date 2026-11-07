@@ -23,12 +23,7 @@ public class VelocityPluginLogger implements PluginLogger {
   }
 
   @Override
-  public void error(String message) {
-    this.parent.error(message);
-  }
-
-  @Override
-  public void error(String message, Exception e) {
+  public void error(String message, Throwable e) {
     this.parent.error(message, e);
   }
 
