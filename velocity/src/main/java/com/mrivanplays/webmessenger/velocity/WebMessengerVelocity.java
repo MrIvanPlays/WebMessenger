@@ -49,7 +49,13 @@ public class WebMessengerVelocity {
             ? "https://maven-central.storage-download.googleapis.com/maven2/"
             : property,
         dataDirectory.resolve("dependencies"),
-        o -> slf4jLogger.error("Exception resolving dependencies", o),
+        o -> {
+          if (o instanceof Throwable e) {
+            slf4jLogger.error("Exception resolving dependencies", e);
+          } else {
+            slf4jLogger.info(String.valueOf(o));
+          }
+        },
         p -> server.getPluginManager().addToClasspath(this, p));
     com.mrivanplays.webmessenger.velocity.IsolatedVelocityPluginBootstrap.getInstance()
         .boot(this, slf4jLogger, server, dataDirectory);

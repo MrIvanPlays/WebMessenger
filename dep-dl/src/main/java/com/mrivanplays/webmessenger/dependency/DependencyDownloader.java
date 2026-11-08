@@ -13,12 +13,11 @@ import java.util.function.Consumer;
 
 public class DependencyDownloader {
 
-  // def repo url: https://repo1.maven.org/maven2/
   public static void resolveDependencies(
       List<Dependency> dependencies,
       String repositoryUrl,
       Path directory,
-      Consumer<Throwable> loggingFunc,
+      Consumer<Object> loggingFunc,
       Consumer<Path> addToClasspath) {
     Map<URI, Path> resolvedUrls = new HashMap<>();
     for (var dependency : dependencies) {
@@ -39,6 +38,7 @@ public class DependencyDownloader {
         addToClasspath.accept(entry.getValue());
         continue;
       }
+      loggingFunc.accept("Downloading dependency " + entry.getKey().toString());
       try {
         if (!Files.exists(directory)) {
           Files.createDirectory(directory);
@@ -49,6 +49,7 @@ public class DependencyDownloader {
           Files.copy(is, entry.getValue(), StandardCopyOption.REPLACE_EXISTING);
         }
         addToClasspath.accept(entry.getValue());
+        loggingFunc.accept("Dependency '" + entry.getValue().getFileName() + "' downloaded");
       } catch (IOException e) {
         loggingFunc.accept(e);
       }
