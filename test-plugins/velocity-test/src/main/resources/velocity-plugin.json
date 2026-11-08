@@ -1,0 +1,11 @@
+{
+  "id": "webmessenger-test-plugin",
+  "name": "WebMessenger Test",
+  "version": "0.0.1-DEV",
+  "main": "com.mrivanplays.webmessenger.testplugins.VelocityTestPlugin",
+  "dependencies": [
+    {
+      "id": "webmessenger-velocity"
+    }
+  ]
+}

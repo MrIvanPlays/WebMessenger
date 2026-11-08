@@ -15,6 +15,7 @@
         <module>velocity</module>
         <module>api</module>
         <module>dep-dl</module>
+        <module>test-plugins/velocity-test</module>
     </modules>
 
     <properties>
