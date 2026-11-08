@@ -1,5 +1,6 @@
 package com.mrivanplays.webmessenger.velocity;
 
+import com.google.gson.Gson;
 import com.google.inject.Inject;
 import com.mrivanplays.webmessenger.dependency.DependencyDownloader;
 import com.mrivanplays.webmessenger.dependency.DependencyResolver;
@@ -35,13 +36,18 @@ public class WebMessengerVelocity {
         slf4jLogger.error("Failed to create directory: " + dataDirectory, e);
       }
     }
+    var property =
+        System.getProperty("com.mrivanplays.repository") == null
+            ? System.getenv().get("com.mrivanplays.repoistory")
+            : System.getProperty("com.mrivanplays.repository");
     // load dependencies BEFORE doing anything else
     // a hacky way not to import anything from downloaded libraries
     DependencyDownloader.resolveDependencies(
         DependencyResolver.resolveDependencies(
-            RepositoryLinkResolver.GSON,
-            getClass().getClassLoader().getResourceAsStream("dependencies.json")),
-        RepositoryLinkResolver.resolve(dataDirectory, getClass().getClassLoader()),
+            new Gson(), getClass().getClassLoader().getResourceAsStream("dependencies.json")),
+        property == null
+            ? "https://maven-central.storage-download.googleapis.com/maven2/"
+            : property,
         dataDirectory.resolve("dependencies"),
         o -> slf4jLogger.error("Exception resolving dependencies", o),
         p -> server.getPluginManager().addToClasspath(this, p));
