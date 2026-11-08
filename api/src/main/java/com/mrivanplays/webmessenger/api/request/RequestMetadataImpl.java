@@ -12,7 +12,8 @@ record RequestMetadataImpl(
     @NotNull String route,
     @NotNull RequestType type,
     @Nullable List<CustomHeader> requiredHeaders,
-    @Nullable String description)
+    @Nullable String description,
+    boolean shallAuthenticate)
     implements RequestMetadata {
 
   RequestMetadataImpl {

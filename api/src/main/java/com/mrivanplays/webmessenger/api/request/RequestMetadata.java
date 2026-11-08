@@ -141,7 +141,31 @@ public sealed interface RequestMetadata permits RequestMetadataImpl {
       @NotNull RequestType type,
       @Nullable String description,
       @Nullable List<CustomHeader> headers) {
-    return new RequestMetadataImpl(identifier, route, type, headers, description);
+    return of(identifier, route, type, description, true, headers);
+  }
+
+  /**
+   * Creates a new metadata
+   *
+   * @param identifier metadata creator identifier
+   * @param route route that the web server handles
+   * @param type request type
+   * @param description request description
+   * @param shallAuthenticate shall the request be authenticated by WebMessenger server
+   * @param headers required headers before the request is passed to {@link CustomRequest#handle}
+   * @return new request metadata
+   * @throws NullPointerException if the identifier, the route or the request type are null
+   * @throws IllegalArgumentException if the route is empty or doesn't start with '/'
+   */
+  @NotNull
+  static RequestMetadata of(
+      @NotNull Identifier identifier,
+      @NotNull String route,
+      @NotNull RequestType type,
+      @Nullable String description,
+      boolean shallAuthenticate,
+      @Nullable List<CustomHeader> headers) {
+    return new RequestMetadataImpl(identifier, route, type, headers, description, shallAuthenticate);
   }
 
   /**
@@ -188,4 +212,11 @@ public sealed interface RequestMetadata permits RequestMetadataImpl {
    */
   @Nullable
   String description();
+
+  /**
+   * Returns whether the request this metadata is for is to be authenticated by the WebMessenger server.
+   *
+   * @return shall authenticate
+   */
+  boolean shallAuthenticate();
 }

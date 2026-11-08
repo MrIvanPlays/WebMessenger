@@ -14,7 +14,7 @@ public class CustomRequestRegistration extends MessengerHttpHandler {
   private final CustomRequest request;
 
   public CustomRequestRegistration(WebMessengerPlugin plugin, CustomRequest request) {
-    super(plugin);
+    super(plugin, request.metadata().shallAuthenticate());
     this.request = request;
   }
 
