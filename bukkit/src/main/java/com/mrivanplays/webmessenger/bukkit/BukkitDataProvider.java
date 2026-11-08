@@ -1,8 +1,6 @@
 package com.mrivanplays.webmessenger.bukkit;
 
 import com.mrivanplays.webmessenger.api.Platform;
-import com.mrivanplays.webmessenger.bukkit.command.PerformCommand;
-import com.mrivanplays.webmessenger.bukkit.command.PerformCommandResolver;
 import com.mrivanplays.webmessenger.core.PlayerInfo;
 import com.mrivanplays.webmessenger.core.ServerDataProvider;
 import com.mrivanplays.webmessenger.core.ServerInfo;
@@ -18,11 +16,11 @@ import org.bukkit.entity.Player;
 public class BukkitDataProvider implements ServerDataProvider {
 
   private final ServerPing ping;
-  private final PerformCommand dispatchCommand;
+  private final WebMessengerBukkit plugin;
 
   public BukkitDataProvider(WebMessengerBukkit plugin) {
     this.ping = new ServerPing(Bukkit.getMinecraftVersion(), true, Bukkit.getMotd());
-    this.dispatchCommand = new PerformCommandResolver(plugin).get();
+    this.plugin = plugin;
   }
 
   @Override
@@ -45,7 +43,9 @@ public class BukkitDataProvider implements ServerDataProvider {
 
   @Override
   public CompletableFuture<Boolean> performCommand(String command) {
-    return dispatchCommand.performCommand(command);
+    return CompletableFuture.supplyAsync(
+        () -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command),
+        t -> Bukkit.getScheduler().runTask(plugin, t));
   }
 
   @Override
