@@ -48,10 +48,10 @@ public class DependencyDownloader {
           Files.createFile(entry.getValue());
           Files.copy(is, entry.getValue(), StandardCopyOption.REPLACE_EXISTING);
         }
+        addToClasspath.accept(entry.getValue());
       } catch (IOException e) {
         loggingFunc.accept(e);
       }
-      addToClasspath.accept(entry.getValue());
     }
   }
 }
