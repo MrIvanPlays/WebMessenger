@@ -2,23 +2,29 @@ package com.mrivanplays.webmessenger.api.ratelimit;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.util.ArrayDeque;
 import java.util.Deque;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import org.jetbrains.annotations.NotNull;
 
-// todo: javadoc
+/** Represents a simple window based rate limiter */
 public final class SimpleRateLimiter implements RateLimiter {
 
+  /**
+   * Create a new rate limiter
+   *
+   * @param settings rate limit settings
+   * @return new simple rate limiter
+   */
   @NotNull
   public static SimpleRateLimiter of(@NotNull Settings settings) {
     return new SimpleRateLimiter(settings);
   }
 
   private final Settings settings;
-  private final Map<InetAddress, Deque<Long>> stored = new HashMap<>();
+  private final Map<InetAddress, Deque<Long>> stored = new ConcurrentHashMap<>();
 
   private SimpleRateLimiter(@NotNull Settings settings) {
     this.settings = Objects.requireNonNull(settings, "settings");
@@ -38,7 +44,7 @@ public final class SimpleRateLimiter implements RateLimiter {
     Deque<Long> timestamps = stored.get(address.getAddress());
     long currentTimeMillis = System.currentTimeMillis();
     if (timestamps == null) {
-      timestamps = new ArrayDeque<>();
+      timestamps = new ConcurrentLinkedDeque<>();
       timestamps.addLast(System.currentTimeMillis());
       stored.put(address.getAddress(), timestamps);
       return true;
