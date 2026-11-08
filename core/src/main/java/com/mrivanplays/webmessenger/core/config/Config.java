@@ -12,9 +12,9 @@ import org.yaml.snakeyaml.Yaml;
 
 public class Config {
 
-  private int port;
-  private final String secret;
-  private final boolean enableRateLimit;
+  private int port = 8082;
+  private String secret = "43ab005peek2ehrje";
+  private boolean enableRateLimit = false;
   private int rateLimit = -1;
   private Duration rateLimitDuration = Duration.ofSeconds(5);
 
@@ -28,6 +28,7 @@ public class Config {
       } catch (IOException e) {
         logger.error("Exception during config.yml creation", e);
       }
+      return;
     }
     Yaml yaml = new Yaml();
     try {
@@ -36,9 +37,12 @@ public class Config {
         this.port = Integer.parseInt(String.valueOf(loaded.get("port")));
       } catch (NumberFormatException e) {
         logger.warn("Invalid port provided, falling back to port 8082");
-        this.port = 8082;
       }
+      var defSecret = this.secret;
       this.secret = String.valueOf(loaded.get("secret"));
+      if (defSecret.equals(this.secret)) {
+        logger.warn("Please change the default secret in config.yml with your own");
+      }
       this.enableRateLimit = Boolean.parseBoolean(String.valueOf(loaded.get("enable-rate-limit")));
       if (enableRateLimit) {
         logger.info("Rate limiter enabled");
@@ -53,7 +57,6 @@ public class Config {
               Duration.ofSeconds(Long.parseLong(String.valueOf(loaded.get("rate-limit-time"))));
         } catch (NumberFormatException e) {
           logger.warn("Invalid rate limit period window provided, falling back to 5 (seconds)");
-          this.rateLimitDuration = Duration.ofSeconds(5);
         }
       }
       boolean debugMessages = Boolean.parseBoolean(String.valueOf(loaded.get("enable-debug")));
@@ -61,7 +64,7 @@ public class Config {
         logger.enableDebugMessages();
       }
     } catch (FileNotFoundException e) {
-      throw new RuntimeException("Could not find configuration file", e);
+      logger.error("Could not load config.yml", e);
     }
   }
 
