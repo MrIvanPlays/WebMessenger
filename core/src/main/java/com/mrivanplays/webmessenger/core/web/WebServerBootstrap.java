@@ -54,7 +54,6 @@ public class WebServerBootstrap extends WebMessengerServer {
     eventBus =
         EventBus.createAsyncEventBus(
             plugin.getAsyncExecutor(), new EventBusExceptionLogger(plugin.getLogger()));
-    EBusInstance.set(eventBus);
     if (plugin.getConfig().isRateLimitEnabled()) {
       if (rateLimiter == null) {
         this.setRateLimiter(

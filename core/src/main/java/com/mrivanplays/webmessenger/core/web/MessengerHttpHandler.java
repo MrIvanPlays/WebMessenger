@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
+import com.mrivanplays.webmessenger.api.WebMessengerServer;
 import com.mrivanplays.webmessenger.api.event.HttpRequestHandleEvent;
 import com.mrivanplays.webmessenger.api.ratelimit.RateLimiter;
 import com.mrivanplays.webmessenger.api.request.RequestMetadata;
@@ -75,7 +76,8 @@ public abstract class MessengerHttpHandler implements HttpHandler {
         return;
       }
       HttpRequestHandleEvent event =
-          EBusInstance.get()
+          WebMessengerServer.getInstance()
+              .eventBus()
               .fire(
                   new HttpRequestHandleEvent(
                       new RequestResponseContextImpl(exchange, this.gson, this.metadata())))
