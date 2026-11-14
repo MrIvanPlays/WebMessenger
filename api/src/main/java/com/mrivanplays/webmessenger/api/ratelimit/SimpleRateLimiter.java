@@ -1,3 +1,24 @@
+/*
+ * Copyright (c) Ivan Pekov 2026
+ * Copyright (c) Contributors 2026
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
 package com.mrivanplays.webmessenger.api.ratelimit;
 
 import java.net.InetAddress;
@@ -7,9 +28,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NullMarked;
 
 /** Represents a simple window based rate limiter */
+@NullMarked
 public final class SimpleRateLimiter implements RateLimiter {
 
   /**
@@ -18,28 +40,26 @@ public final class SimpleRateLimiter implements RateLimiter {
    * @param settings rate limit settings
    * @return new simple rate limiter
    */
-  @NotNull
-  public static SimpleRateLimiter of(@NotNull Settings settings) {
+  public static SimpleRateLimiter of(Settings settings) {
     return new SimpleRateLimiter(settings);
   }
 
   private final Settings settings;
   private final Map<InetAddress, Deque<Long>> stored = new ConcurrentHashMap<>();
 
-  private SimpleRateLimiter(@NotNull Settings settings) {
+  private SimpleRateLimiter(Settings settings) {
     this.settings = Objects.requireNonNull(settings, "settings");
   }
 
   /** {@inheritDoc} */
   @Override
-  @NotNull
   public Settings settings() {
     return settings;
   }
 
   /** {@inheritDoc} */
   @Override
-  public boolean process(@NotNull InetSocketAddress address) {
+  public boolean process(InetSocketAddress address) {
     Objects.requireNonNull(address, "address");
     Deque<Long> timestamps = stored.get(address.getAddress());
     long currentTimeMillis = System.currentTimeMillis();
@@ -67,7 +87,7 @@ public final class SimpleRateLimiter implements RateLimiter {
 
   /** {@inheritDoc} */
   @Override
-  public long remainingRequests(@NotNull InetSocketAddress address) {
+  public long remainingRequests(InetSocketAddress address) {
     Objects.requireNonNull(address, "address");
     Deque<Long> timestamps = stored.get(address.getAddress());
     if (timestamps == null) {

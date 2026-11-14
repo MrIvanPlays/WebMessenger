@@ -1,12 +1,33 @@
+/*
+ * Copyright (c) Ivan Pekov 2026
+ * Copyright (c) Contributors 2026
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
 package com.mrivanplays.webmessenger.api.request;
 
 import com.mrivanplays.webmessenger.api.utils.ConsumerThrowable;
 import java.io.IOException;
 import java.util.Objects;
-import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NullMarked;
 
 /** Represents a custom request that the WebMessenger web server is going to handle. */
+@NullMarked
 public interface CustomRequest {
 
   /**
@@ -16,21 +37,18 @@ public interface CustomRequest {
    * @param consumer custom request handler
    * @return new {@code CustomRequest} instance
    */
-  @NotNull
   static CustomRequest functional(
-      @NotNull RequestMetadata metadata,
-      @NotNull ConsumerThrowable<RequestResponseContext, IOException> consumer) {
+      RequestMetadata metadata, ConsumerThrowable<RequestResponseContext, IOException> consumer) {
     Objects.requireNonNull(metadata, "metadata");
     Objects.requireNonNull(consumer, "consumer");
     return new CustomRequest() {
       @Override
-      @NotNull
       public RequestMetadata metadata() {
         return metadata;
       }
 
       @Override
-      public void handle(@NotNull RequestResponseContext ctx) throws IOException {
+      public void handle(RequestResponseContext ctx) throws IOException {
         consumer.accept(ctx);
       }
     };
@@ -41,7 +59,6 @@ public interface CustomRequest {
    *
    * @return metadata
    */
-  @NotNull
   RequestMetadata metadata();
 
   /**
@@ -51,6 +68,5 @@ public interface CustomRequest {
    * @param ctx response context
    * @throws IOException if an I/O error occurs
    */
-  @ApiStatus.OverrideOnly
-  void handle(@NotNull RequestResponseContext ctx) throws IOException;
+  void handle(RequestResponseContext ctx) throws IOException;
 }

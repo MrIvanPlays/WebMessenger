@@ -1,21 +1,42 @@
+/*
+ * Copyright (c) Ivan Pekov 2026
+ * Copyright (c) Contributors 2026
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
 package com.mrivanplays.webmessenger.api;
 
 import com.mrivanplays.events.EventBus;
 import com.mrivanplays.webmessenger.api.ratelimit.RateLimiter;
 import com.mrivanplays.webmessenger.api.request.CustomRequestRegistrar;
 import java.util.Optional;
-import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Represents a singleton class of accessing the WebMessenger web server in a plugin controlled
  * manner
  */
+@NullMarked
 public abstract class WebMessengerServer {
 
   //
-  private static WebMessengerServer instance;
+  private static @Nullable WebMessengerServer instance;
 
   /**
    * Get the implementation instance
@@ -27,8 +48,7 @@ public abstract class WebMessengerServer {
     return instance;
   }
 
-  @ApiStatus.Internal
-  public static void setInstance(@NotNull WebMessengerServer newInstance) {
+  public static void setInstance(WebMessengerServer newInstance) {
     if (instance != null) {
       throw new UnsupportedOperationException("WebMessengerServer has already been initialized.");
     }
@@ -57,7 +77,6 @@ public abstract class WebMessengerServer {
    *
    * @return plugin version
    */
-  @NotNull
   public abstract String version();
 
   /**
@@ -66,7 +85,6 @@ public abstract class WebMessengerServer {
    *
    * @return platform
    */
-  @NotNull
   public abstract Platform platform();
 
   /**
@@ -74,7 +92,6 @@ public abstract class WebMessengerServer {
    *
    * @return custom request registrar
    */
-  @NotNull
   public abstract CustomRequestRegistrar customRequestRegistrar();
 
   /**
@@ -82,6 +99,5 @@ public abstract class WebMessengerServer {
    *
    * @return event bus
    */
-  @NotNull
   public abstract EventBus eventBus();
 }

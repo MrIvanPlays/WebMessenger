@@ -1,15 +1,35 @@
+/*
+ * Copyright (c) Ivan Pekov 2026
+ * Copyright (c) Contributors 2026
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
 package com.mrivanplays.webmessenger.api.request;
 
 import com.mrivanplays.webmessenger.api.Identifier;
 import com.mrivanplays.webmessenger.api.request.header.CustomHeader;
 import java.util.Arrays;
 import java.util.List;
-import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 /** Represents a holder of metadata for a {@link CustomRequest custom request} */
-@ApiStatus.NonExtendable
+@NullMarked
 public sealed interface RequestMetadata permits RequestMetadataImpl {
 
   /**
@@ -19,8 +39,7 @@ public sealed interface RequestMetadata permits RequestMetadataImpl {
    * @param route route that the web server handles
    * @return new request metadata
    */
-  @NotNull
-  static RequestMetadata simpleGet(@NotNull Identifier identifier, @NotNull String route) {
+  static RequestMetadata simpleGet(Identifier identifier, String route) {
     return simpleGet(identifier, route, null);
   }
 
@@ -31,9 +50,8 @@ public sealed interface RequestMetadata permits RequestMetadataImpl {
    * @param route route that the web server handles
    * @return new request metadata
    */
-  @NotNull
   static RequestMetadata simpleGet(
-      @NotNull Identifier identifier, @NotNull String route, @Nullable String description) {
+      Identifier identifier, String route, @Nullable String description) {
     return of(identifier, route, RequestType.GET, description);
   }
 
@@ -44,8 +62,7 @@ public sealed interface RequestMetadata permits RequestMetadataImpl {
    * @param route route that the web server handles
    * @return new request metadata
    */
-  @NotNull
-  static RequestMetadata simplePost(@NotNull Identifier identifier, @NotNull String route) {
+  static RequestMetadata simplePost(Identifier identifier, String route) {
     return simplePost(identifier, route, null);
   }
 
@@ -57,9 +74,8 @@ public sealed interface RequestMetadata permits RequestMetadataImpl {
    * @param description description
    * @return new request metadata
    */
-  @NotNull
   static RequestMetadata simplePost(
-      @NotNull Identifier identifier, @NotNull String route, @Nullable String description) {
+      Identifier identifier, String route, @Nullable String description) {
     return of(identifier, route, RequestType.POST, description);
   }
 
@@ -72,12 +88,8 @@ public sealed interface RequestMetadata permits RequestMetadataImpl {
    * @param headers required headers before the request is passed to {@link CustomRequest#handle}
    * @return new request metadata
    */
-  @NotNull
   static RequestMetadata of(
-      @NotNull Identifier identifier,
-      @NotNull String route,
-      @NotNull RequestType type,
-      @Nullable CustomHeader... headers) {
+      Identifier identifier, String route, RequestType type, CustomHeader @Nullable ... headers) {
     return of(identifier, route, type, headers == null ? List.of() : Arrays.asList(headers));
   }
 
@@ -91,13 +103,12 @@ public sealed interface RequestMetadata permits RequestMetadataImpl {
    * @param headers required headers before the request is passed to {@link CustomRequest#handle}
    * @return new request metadata
    */
-  @NotNull
   static RequestMetadata of(
-      @NotNull Identifier identifier,
-      @NotNull String route,
-      @NotNull RequestType type,
+      Identifier identifier,
+      String route,
+      RequestType type,
       @Nullable String description,
-      @Nullable CustomHeader... headers) {
+      CustomHeader @Nullable ... headers) {
     return of(
         identifier, route, type, description, headers == null ? List.of() : Arrays.asList(headers));
   }
@@ -113,12 +124,8 @@ public sealed interface RequestMetadata permits RequestMetadataImpl {
    * @throws NullPointerException if the identifier, the route or the request type are null
    * @throws IllegalArgumentException if the route is empty or doesn't start with '/'
    */
-  @NotNull
   static RequestMetadata of(
-      @NotNull Identifier identifier,
-      @NotNull String route,
-      @NotNull RequestType type,
-      @Nullable List<CustomHeader> headers) {
+      Identifier identifier, String route, RequestType type, @Nullable List<CustomHeader> headers) {
     return of(identifier, route, type, null, headers);
   }
 
@@ -134,11 +141,10 @@ public sealed interface RequestMetadata permits RequestMetadataImpl {
    * @throws NullPointerException if the identifier, the route or the request type are null
    * @throws IllegalArgumentException if the route is empty or doesn't start with '/'
    */
-  @NotNull
   static RequestMetadata of(
-      @NotNull Identifier identifier,
-      @NotNull String route,
-      @NotNull RequestType type,
+      Identifier identifier,
+      String route,
+      RequestType type,
       @Nullable String description,
       @Nullable List<CustomHeader> headers) {
     return of(identifier, route, type, description, true, headers);
@@ -157,15 +163,15 @@ public sealed interface RequestMetadata permits RequestMetadataImpl {
    * @throws NullPointerException if the identifier, the route or the request type are null
    * @throws IllegalArgumentException if the route is empty or doesn't start with '/'
    */
-  @NotNull
   static RequestMetadata of(
-      @NotNull Identifier identifier,
-      @NotNull String route,
-      @NotNull RequestType type,
+      Identifier identifier,
+      String route,
+      RequestType type,
       @Nullable String description,
       boolean shallAuthenticate,
       @Nullable List<CustomHeader> headers) {
-    return new RequestMetadataImpl(identifier, route, type, headers, description, shallAuthenticate);
+    return new RequestMetadataImpl(
+        identifier, route, type, headers, description, shallAuthenticate);
   }
 
   /**
@@ -173,7 +179,6 @@ public sealed interface RequestMetadata permits RequestMetadataImpl {
    *
    * @return identifier
    */
-  @NotNull
   Identifier identifier();
 
   /**
@@ -182,7 +187,6 @@ public sealed interface RequestMetadata permits RequestMetadataImpl {
    *
    * @return route
    */
-  @NotNull
   String route();
 
   /**
@@ -190,7 +194,6 @@ public sealed interface RequestMetadata permits RequestMetadataImpl {
    *
    * @return request type
    */
-  @NotNull
   RequestType type();
 
   /**
@@ -199,8 +202,7 @@ public sealed interface RequestMetadata permits RequestMetadataImpl {
    *
    * @return required headers
    */
-  @Nullable
-  List<CustomHeader> requiredHeaders();
+  @Nullable List<CustomHeader> requiredHeaders();
 
   /**
    * Get basic description of what the request this metadata is for is doing.
@@ -210,11 +212,11 @@ public sealed interface RequestMetadata permits RequestMetadataImpl {
    *
    * @return description, may be null
    */
-  @Nullable
-  String description();
+  @Nullable String description();
 
   /**
-   * Returns whether the request this metadata is for is to be authenticated by the WebMessenger server.
+   * Returns whether the request this metadata is for is to be authenticated by the WebMessenger
+   * server.
    *
    * @return shall authenticate
    */

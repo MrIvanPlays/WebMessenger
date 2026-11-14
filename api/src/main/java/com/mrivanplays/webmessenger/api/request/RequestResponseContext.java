@@ -1,3 +1,24 @@
+/*
+ * Copyright (c) Ivan Pekov 2026
+ * Copyright (c) Contributors 2026
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
 package com.mrivanplays.webmessenger.api.request;
 
 import com.google.gson.Gson;
@@ -11,9 +32,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
-import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Represents a response context for a received request.
@@ -36,7 +56,7 @@ import org.jetbrains.annotations.Nullable;
  * <p>A done RequestResponseContext is not able to do anything, as the original http exchange is
  * closed whenever a response has been written to the requestee.
  */
-@ApiStatus.NonExtendable
+@NullMarked
 public interface RequestResponseContext {
 
   /**
@@ -46,7 +66,7 @@ public interface RequestResponseContext {
    * @throws IOException if an i/o error occurs
    * @throws NullPointerException if the response is null, or the response code has not been set
    */
-  void writeResponse(@NotNull JsonElement response) throws IOException;
+  void writeResponse(JsonElement response) throws IOException;
 
   /**
    * Get a url attribute if present.
@@ -59,7 +79,7 @@ public interface RequestResponseContext {
    * @param name attribute name
    * @return populated optional if present, empty optional otherwise
    */
-  Optional<String> attribute(@NotNull String name);
+  Optional<String> attribute(String name);
 
   /**
    * Set the response code before writing a response body
@@ -79,11 +99,11 @@ public interface RequestResponseContext {
   /**
    * Read the request body as {@link JsonObject json object} if it's present.
    *
-   * @param gson gson instance to parse from
+   * @param gson Gson instance to parse from
    * @return populated optional if present, empty optional otherwise
    * @throws IOException if an i/o error occurs
    */
-  default Optional<JsonObject> readRequestBodyAsJson(@NotNull Gson gson) throws IOException {
+  default Optional<JsonObject> readRequestBodyAsJson(Gson gson) throws IOException {
     Objects.requireNonNull(gson, "gson");
     var body = this.requestBody();
     if (body.isEmpty()) {
@@ -100,7 +120,7 @@ public interface RequestResponseContext {
    * @param key request header key
    * @return populated optional if present, empty optional otherwise
    */
-  Optional<CustomHeader> requestHeader(@NotNull String key);
+  Optional<CustomHeader> requestHeader(String key);
 
   /**
    * Utility method to directly check whether a request header is present
@@ -108,7 +128,7 @@ public interface RequestResponseContext {
    * @param key request header key
    * @return true if present, false otherwise
    */
-  default boolean hasRequestHeader(@NotNull String key) {
+  default boolean hasRequestHeader(String key) {
     return requestHeader(key).isPresent();
   }
 
@@ -118,7 +138,7 @@ public interface RequestResponseContext {
    * @param header custom header to add
    * @throws IllegalArgumentException if done ( {@link #isDone()} )
    */
-  void addResponseHeader(@NotNull CustomHeader header);
+  void addResponseHeader(CustomHeader header);
 
   /**
    * Returns whether this response context was already handled.
@@ -136,7 +156,6 @@ public interface RequestResponseContext {
    *
    * @return remote address
    */
-  @NotNull
   InetSocketAddress remoteAddress();
 
   /**
@@ -144,7 +163,6 @@ public interface RequestResponseContext {
    *
    * @return request metadata
    */
-  @NotNull
   RequestMetadata metadata();
 
   /**
@@ -152,7 +170,6 @@ public interface RequestResponseContext {
    *
    * @return request type method string
    */
-  @NotNull
   String requestUsedType();
 
   /**

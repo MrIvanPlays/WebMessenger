@@ -1,3 +1,24 @@
+/*
+ * Copyright (c) Ivan Pekov 2026
+ * Copyright (c) Contributors 2026
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
 package com.mrivanplays.webmessenger.core.web;
 
 import com.mrivanplays.events.EventBus;
@@ -24,15 +45,17 @@ import com.mrivanplays.webmessenger.core.web.minecraft.StoreCookieRequest;
 import com.sun.net.httpserver.HttpServer;
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 public class WebServerBootstrap extends WebMessengerServer {
 
   private final WebMessengerPlugin plugin;
   private HttpServer server;
-  private Map<String, MessengerHttpHandler> DEFAULT_HANDLERS = new HashMap<>();
+  private final Map<String, MessengerHttpHandler> DEFAULT_HANDLERS = new ConcurrentHashMap<>();
   private RateLimiter rateLimiter;
   private final CustomRequestRegistrarImpl customRequestRegistrar;
   private EventBus eventBus;
@@ -80,11 +103,11 @@ public class WebServerBootstrap extends WebMessengerServer {
           .info(
               "Running on "
                   + plugin.getDataProvider().type().prettyName()
-                  + " minecraft server software");
+                  + " Minecraft server software");
       CustomRequestRegistrarImpl.addObserver(
           new CustomRequestRegistrarImpl.Observer() {
             @Override
-            public void onRequestRegistered(CustomRequest req) {
+            public void onRequestRegistered(@NonNull CustomRequest req) {
               if (DEFAULT_HANDLERS.keySet().stream()
                   .anyMatch(s -> s.equalsIgnoreCase(req.metadata().route()))) {
                 plugin
@@ -126,7 +149,7 @@ public class WebServerBootstrap extends WebMessengerServer {
             }
 
             @Override
-            public void onRequestUnregistered(RequestMetadata metadata) {
+            public void onRequestUnregistered(@NonNull RequestMetadata metadata) {
               server.removeContext(metadata.route());
               plugin
                   .getLogger()
@@ -153,12 +176,13 @@ public class WebServerBootstrap extends WebMessengerServer {
   }
 
   @Override
+  @NonNull
   public Optional<RateLimiter> rateLimiter() {
     return Optional.ofNullable(rateLimiter);
   }
 
   @Override
-  public void setRateLimiter(RateLimiter rateLimiter) {
+  public void setRateLimiter(@Nullable RateLimiter rateLimiter) {
     plugin.getLogger().debug("Rate limiter changed");
     this.rateLimiter = rateLimiter;
     // update for all handlers
@@ -168,21 +192,25 @@ public class WebServerBootstrap extends WebMessengerServer {
   }
 
   @Override
+  @NonNull
   public String version() {
     return plugin.getPluginVersion();
   }
 
   @Override
+  @NonNull
   public Platform platform() {
     return plugin.getDataProvider().type();
   }
 
   @Override
+  @NonNull
   public CustomRequestRegistrar customRequestRegistrar() {
     return customRequestRegistrar;
   }
 
   @Override
+  @NonNull
   public EventBus eventBus() {
     return this.eventBus;
   }
