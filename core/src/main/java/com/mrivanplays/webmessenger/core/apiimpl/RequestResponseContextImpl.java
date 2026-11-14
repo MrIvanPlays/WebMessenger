@@ -27,6 +27,7 @@ public class RequestResponseContextImpl implements RequestResponseContext {
   private final Map<String, String> attributes;
   private final List<CustomHeader> responseHeaders;
   private AtomicBoolean done = new AtomicBoolean(false);
+  private final String usedRequestType;
 
   public RequestResponseContextImpl(HttpExchange exchange, Gson gson, RequestMetadata metadata) {
     this.exchange = exchange;
@@ -34,6 +35,7 @@ public class RequestResponseContextImpl implements RequestResponseContext {
     this.attributes = Utils.getAttributes(exchange.getRequestURI());
     this.responseHeaders = new ArrayList<>();
     this.metadata = metadata;
+    this.usedRequestType = exchange.getRequestMethod();
   }
 
   @Override
@@ -137,5 +139,10 @@ public class RequestResponseContextImpl implements RequestResponseContext {
   @Override
   public RequestMetadata metadata() {
     return this.metadata;
+  }
+
+  @Override
+  public String requestUsedType() {
+    return this.usedRequestType;
   }
 }

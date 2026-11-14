@@ -16,6 +16,13 @@ public interface CustomRequestRegistrar {
   void registerRequest(@NotNull CustomRequest request);
 
   /**
+   * Unregister a custom request that is already registered.
+   *
+   * @param metadata request metadata
+   */
+  void unregisterRequest(@NotNull RequestMetadata metadata);
+
+  /**
    * Check if a route is available
    *
    * @param route route to check

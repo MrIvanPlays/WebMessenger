@@ -8,10 +8,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Represents a response context for a received request.
@@ -144,4 +146,28 @@ public interface RequestResponseContext {
    */
   @NotNull
   RequestMetadata metadata();
+
+  /**
+   * Get the request type method this request used.
+   *
+   * @return request type method string
+   */
+  @NotNull
+  String requestUsedType();
+
+  /**
+   * Get the request type method this request used as a {@link RequestType request type} constant.
+   *
+   * <p>May return <code>null</code>, since not all HTTP method request types are present in the
+   * request type enum.
+   *
+   * @return request type method enum, or null
+   */
+  default @Nullable RequestType requestUsedTypeParsed() {
+    try {
+      return RequestType.valueOf(this.requestUsedType().toUpperCase(Locale.ROOT));
+    } catch (IllegalArgumentException e) {
+      return null;
+    }
+  }
 }

@@ -76,6 +76,17 @@ public class WebServerBootstrapTest {
     plugin.setAsyncExecutor(Runnable::run);
     plugin.enable();
     this.registerCustomRequest();
+    ToBeUnregisteredRequest toBeUnregistered = new ToBeUnregisteredRequest();
+    WebMessengerServer.getInstance().customRequestRegistrar().registerRequest(toBeUnregistered);
+    try (ScheduledExecutorService scheduled = Executors.newSingleThreadScheduledExecutor()) {
+      scheduled.schedule(
+          () ->
+              WebMessengerServer.getInstance()
+                  .customRequestRegistrar()
+                  .unregisterRequest(toBeUnregistered.metadata()),
+          1,
+          TimeUnit.MINUTES);
+    }
     SubscribedEventListenerBakery.registerListeners(
         WebMessengerServer.getInstance().eventBus(), new EventListener(plugin));
   }
@@ -201,6 +212,23 @@ public class WebServerBootstrapTest {
       JsonObject o = new JsonObject();
       o.addProperty("hello", "my name is anton");
       o.addProperty("every", "morning i get up and go to school");
+      ctx.writeResponse(o);
+    }
+  }
+
+  class ToBeUnregisteredRequest implements CustomRequest {
+
+    @Override
+    public RequestMetadata metadata() {
+      return RequestMetadata.of(
+          new Identifier("my", "pluginname"), "/toUnregister", RequestType.GET);
+    }
+
+    @Override
+    public void handle(RequestResponseContext ctx) throws IOException {
+      ctx.setResponseCode(200);
+      JsonObject o = new JsonObject();
+      o.addProperty("lorem", "ipsum dolor sit amet");
       ctx.writeResponse(o);
     }
   }

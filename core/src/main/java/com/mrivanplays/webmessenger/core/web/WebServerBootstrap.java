@@ -7,7 +7,9 @@ import com.mrivanplays.webmessenger.api.event.CustomRequestRegisterEvent;
 import com.mrivanplays.webmessenger.api.event.WebServerShutdownEvent;
 import com.mrivanplays.webmessenger.api.ratelimit.RateLimiter;
 import com.mrivanplays.webmessenger.api.ratelimit.SimpleRateLimiter;
+import com.mrivanplays.webmessenger.api.request.CustomRequest;
 import com.mrivanplays.webmessenger.api.request.CustomRequestRegistrar;
+import com.mrivanplays.webmessenger.api.request.RequestMetadata;
 import com.mrivanplays.webmessenger.core.WebMessengerPlugin;
 import com.mrivanplays.webmessenger.core.apiimpl.CustomRequestRegistrarImpl;
 import com.mrivanplays.webmessenger.core.log.EventBusExceptionLogger;
@@ -79,46 +81,63 @@ public class WebServerBootstrap extends WebMessengerServer {
               "Running on "
                   + plugin.getDataProvider().type().prettyName()
                   + " minecraft server software");
-      CustomRequestRegistrarImpl.addObserver(req -> {
-        if (DEFAULT_HANDLERS.keySet().stream()
-            .anyMatch(s -> s.equalsIgnoreCase(req.metadata().route()))) {
-          plugin
-              .getLogger()
-              .warn(
-                  "Identifier '"
-                      + req.metadata().identifier().asName()
-                      + "' tried to register a custom route for '"
-                      + req.metadata().route()
-                      + "' and will be ignored.");
-          return;
-        }
-        eventBus
-            .fire(new CustomRequestRegisterEvent(req.metadata()))
-            .whenComplete((event, _) -> {
-              if (!event.result().allowed()) {
+      CustomRequestRegistrarImpl.addObserver(
+          new CustomRequestRegistrarImpl.Observer() {
+            @Override
+            public void onRequestRegistered(CustomRequest req) {
+              if (DEFAULT_HANDLERS.keySet().stream()
+                  .anyMatch(s -> s.equalsIgnoreCase(req.metadata().route()))) {
+                plugin
+                    .getLogger()
+                    .warn(
+                        "Identifier '"
+                            + req.metadata().identifier().asName()
+                            + "' tried to register a custom route for '"
+                            + req.metadata().route()
+                            + "' and will be ignored.");
                 return;
               }
-              plugin
-                  .getLogger()
-                  .debug(
-                      "Registering handler '"
-                          + req.metadata().route()
-                          + "' "
-                          + "with identifier '"
-                          + req.metadata().identifier().asName()
-                          + "'");
-              server.createContext(
-                  req.metadata().route(), new CustomRequestRegistration(this.plugin, req));
+              eventBus
+                  .fire(new CustomRequestRegisterEvent(req.metadata()))
+                  .whenComplete((event, _) -> {
+                    if (!event.result().allowed()) {
+                      return;
+                    }
+                    plugin
+                        .getLogger()
+                        .debug(
+                            "Registering handler '"
+                                + req.metadata().route()
+                                + "' "
+                                + "with identifier '"
+                                + req.metadata().identifier().asName()
+                                + "'");
+                    server.createContext(
+                        req.metadata().route(), new CustomRequestRegistration(plugin, req));
+                    plugin
+                        .getLogger()
+                        .info(
+                            "Identifier '"
+                                + req.metadata().identifier().asName()
+                                + "' registered route '"
+                                + req.metadata().route()
+                                + "'");
+                  });
+            }
+
+            @Override
+            public void onRequestUnregistered(RequestMetadata metadata) {
+              server.removeContext(metadata.route());
               plugin
                   .getLogger()
                   .info(
                       "Identifier '"
-                          + req.metadata().identifier().asName()
-                          + "' registered route '"
-                          + req.metadata().route()
+                          + metadata.identifier().asName()
+                          + "' unregistered route '"
+                          + metadata.route()
                           + "'");
-            });
-      });
+            }
+          });
     } catch (IOException e) {
       plugin.getLogger().error("Couldn't start server", e);
     }

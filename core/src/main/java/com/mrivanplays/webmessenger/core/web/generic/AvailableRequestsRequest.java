@@ -2,6 +2,7 @@ package com.mrivanplays.webmessenger.core.web.generic;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.mrivanplays.webmessenger.api.request.CustomRequest;
 import com.mrivanplays.webmessenger.api.request.RequestMetadata;
 import com.mrivanplays.webmessenger.api.request.RequestType;
 import com.mrivanplays.webmessenger.core.WebMessengerPlugin;
@@ -27,11 +28,26 @@ public class AvailableRequestsRequest extends MessengerHttpHandler {
     super(plugin);
     this.metadata =
         RequestMetadata.simpleGet(WebMessengerPlugin.API_IDENTIFIER, "/availableRequests");
-    CustomRequestRegistrarImpl.addObserver(req ->
-        struct.add(
-            new AbstractMap.SimpleEntry<>(
-                req.metadata().route(),
-                new DescribedMetadata(req.metadata().type(), req.metadata().description()))));
+    CustomRequestRegistrarImpl.addObserver(
+        new CustomRequestRegistrarImpl.Observer() {
+          @Override
+          public void onRequestRegistered(CustomRequest req) {
+            struct.add(
+                new AbstractMap.SimpleEntry<>(
+                    req.metadata().route(),
+                    new DescribedMetadata(req.metadata().type(), req.metadata().description())));
+          }
+
+          @Override
+          public void onRequestUnregistered(RequestMetadata metadata) {
+            struct.removeIf(e ->
+                e.getKey().equals(metadata.route())
+                    && (e.getValue().description() == null
+                        || metadata.description() == null
+                        || e.getValue().description().equals(metadata.description()))
+                    && e.getValue().requestType() == metadata.type());
+          }
+        });
   }
 
   public void populateDefaults(Map<String, MessengerHttpHandler> handlers) {

@@ -14,6 +14,8 @@ public class CustomRequestRegistrarImpl implements CustomRequestRegistrar {
   public interface Observer {
 
     void onRequestRegistered(CustomRequest request);
+
+    void onRequestUnregistered(RequestMetadata metadata);
   }
 
   private final Set<CustomRequest> registrar = Collections.newSetFromMap(new ConcurrentHashMap<>());
@@ -38,6 +40,20 @@ public class CustomRequestRegistrarImpl implements CustomRequestRegistrar {
     registrar.add(wrapped);
     for (Observer observer : observers) {
       observer.onRequestRegistered(wrapped);
+    }
+  }
+
+  @Override
+  public void unregisterRequest(RequestMetadata metadata) {
+    Objects.requireNonNull(metadata, "metadata");
+    if (this.registrar.removeIf(
+        r ->
+            r.metadata().identifier().equals(metadata.identifier())
+                && r.metadata().route().equals(metadata.route())
+                && r.metadata().type() == metadata.type())) {
+      for (Observer observer : observers) {
+        observer.onRequestUnregistered(metadata);
+      }
     }
   }
 
