@@ -40,7 +40,7 @@ import org.jspecify.annotations.NonNull;
 
 public class AvailableRequestsRequest extends MessengerHttpHandler {
 
-  record DescribedMetadata(RequestType requestType, String description) {}
+  record DescribedMetadata(RequestType requestType, String description, boolean pluginDefault) {}
 
   private final RequestMetadata metadata;
   private final Set<Map.Entry<String, DescribedMetadata>> struct =
@@ -57,7 +57,8 @@ public class AvailableRequestsRequest extends MessengerHttpHandler {
             struct.add(
                 new AbstractMap.SimpleEntry<>(
                     req.metadata().route(),
-                    new DescribedMetadata(req.metadata().type(), req.metadata().description())));
+                    new DescribedMetadata(
+                        req.metadata().type(), req.metadata().description(), false)));
           }
 
           @Override
@@ -67,7 +68,8 @@ public class AvailableRequestsRequest extends MessengerHttpHandler {
                     && (e.getValue().description() == null
                         || metadata.description() == null
                         || e.getValue().description().equals(metadata.description()))
-                    && e.getValue().requestType() == metadata.type());
+                    && e.getValue().requestType() == metadata.type()
+                    && !e.getValue().pluginDefault());
           }
         });
   }
@@ -81,7 +83,9 @@ public class AvailableRequestsRequest extends MessengerHttpHandler {
           new AbstractMap.SimpleEntry<>(
               entry.getKey(),
               new DescribedMetadata(
-                  entry.getValue().metadata().type(), entry.getValue().metadata().description())));
+                  entry.getValue().metadata().type(),
+                  entry.getValue().metadata().description(),
+                  true)));
     }
   }
 
