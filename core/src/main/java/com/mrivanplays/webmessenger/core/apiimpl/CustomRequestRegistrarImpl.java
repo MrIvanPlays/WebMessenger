@@ -21,8 +21,6 @@
  */
 package com.mrivanplays.webmessenger.core.apiimpl;
 
-import com.mrivanplays.webmessenger.api.WebMessengerServer;
-import com.mrivanplays.webmessenger.api.event.CustomRequestUnregisterEvent;
 import com.mrivanplays.webmessenger.api.request.CustomRequest;
 import com.mrivanplays.webmessenger.api.request.CustomRequestRegistrar;
 import com.mrivanplays.webmessenger.api.request.RequestMetadata;
@@ -78,9 +76,6 @@ public class CustomRequestRegistrarImpl implements CustomRequestRegistrar {
             r.metadata().identifier().equals(metadata.identifier())
                 && r.metadata().route().equals(metadata.route())
                 && r.metadata().type() == metadata.type())) {
-      WebMessengerServer.getInstance()
-          .eventBus()
-          .fireAndForget(new CustomRequestUnregisterEvent(metadata));
       for (Observer observer : observers) {
         observer.onRequestUnregistered(metadata);
       }

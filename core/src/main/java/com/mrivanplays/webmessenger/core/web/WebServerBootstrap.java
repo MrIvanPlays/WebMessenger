@@ -25,6 +25,7 @@ import com.mrivanplays.events.EventBus;
 import com.mrivanplays.webmessenger.api.Platform;
 import com.mrivanplays.webmessenger.api.WebMessengerServer;
 import com.mrivanplays.webmessenger.api.event.CustomRequestRegisterEvent;
+import com.mrivanplays.webmessenger.api.event.CustomRequestUnregisterEvent;
 import com.mrivanplays.webmessenger.api.event.WebServerShutdownEvent;
 import com.mrivanplays.webmessenger.api.ratelimit.RateLimiter;
 import com.mrivanplays.webmessenger.api.ratelimit.SimpleRateLimiter;
@@ -150,7 +151,20 @@ public class WebServerBootstrap extends WebMessengerServer {
 
             @Override
             public void onRequestUnregistered(@NonNull RequestMetadata metadata) {
+              if (DEFAULT_HANDLERS.keySet().stream()
+                  .anyMatch(s -> s.equalsIgnoreCase(metadata.route()))) {
+                plugin
+                    .getLogger()
+                    .warn(
+                        "Identifier '"
+                            + metadata.identifier().asName()
+                            + "' tried to unregister default request handle '"
+                            + metadata.route()
+                            + "' and will be ignored.");
+                return;
+              }
               server.removeContext(metadata.route());
+              eventBus.fireAndForget(new CustomRequestUnregisterEvent(metadata));
               plugin
                   .getLogger()
                   .info(
