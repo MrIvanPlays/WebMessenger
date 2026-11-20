@@ -21,6 +21,7 @@
  */
 package com.mrivanplays.webmessenger.core;
 
+import com.mrivanplays.annotationconfig.yaml.YamlConfig;
 import com.mrivanplays.webmessenger.api.Identifier;
 import com.mrivanplays.webmessenger.api.WebMessengerServer;
 import com.mrivanplays.webmessenger.core.config.Config;
@@ -54,10 +55,27 @@ public final class WebMessengerPlugin {
   }
 
   public void enable() {
-    this.config = new Config(new File(this.dataDirectory.toFile(), "config.yml"), logger);
+    this.initConfig();
     webBootstrap = new WebServerBootstrap(this);
     WebMessengerServer.setInstance(webBootstrap);
     webBootstrap.boot();
+  }
+
+  private void initConfig() {
+    this.config = new Config();
+    String defSecret = this.config.getSecret();
+    YamlConfig.getConfigResolver()
+        .loadOrDump(this.config, new File(this.dataDirectory.toFile(), "config.yml"));
+    if (defSecret.equals(this.config.getSecret())) {
+      this.logger.warn("Please change the default secret in config.yml with your own");
+    }
+    if (this.config.isDebugEnabled()) {
+      this.logger.info("Debug messages enabled");
+      this.logger.enableDebugMessages();
+    }
+    if (this.config.isRateLimitEnabled()) {
+      this.logger.info("Rate limiter enabled");
+    }
   }
 
   public void disable() {

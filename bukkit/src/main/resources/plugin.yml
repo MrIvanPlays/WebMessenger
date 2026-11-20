@@ -7,5 +7,6 @@ load: POSTWORLD
 
 authors: [ Ivan Pekov ]
 libraries:
-  - com.mrivanplays:events:1.0.0
+  - com.mrivanplays:events:${events.version}
+  - com.mrivanplays:annotationconfig-yaml:${annotationConfig.version}
 
