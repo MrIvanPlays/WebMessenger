@@ -23,9 +23,15 @@
     <maven.compiler.target>25</maven.compiler.target>
     <java.version>25</java.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <!-- version spec -->
     <annotationConfig.version>3.0.3</annotationConfig.version>
     <events.version>1.0.0</events.version>
     <gson.version>2.15.0</gson.version>
+    <paper.version>[26.3.build,)</paper.version>
+    <bungee.version>1.21-R0.3</bungee.version>
+    <velocity.version>4.3.0</velocity.version>
+    <junit.version>6.1.3</junit.version>
+    <jspecify.version>1.0.0</jspecify.version>
   </properties>
 
   <build>
@@ -66,13 +72,13 @@
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
-      <version>6.1.3</version>
+      <version>${junit.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.jspecify</groupId>
       <artifactId>jspecify</artifactId>
-      <version>1.0.0</version>
+      <version>${jspecify.version}</version>
       <scope>provided</scope>
     </dependency>
   </dependencies>
